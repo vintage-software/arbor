@@ -1,0 +1,33 @@
+{
+  "name": "blanket",
+  "version": "0.0.0",
+  "description": "A CLI tool to build projects across several platforms in parallel",
+  "main": "index.js",
+  "bin": {
+    "blanket": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "build": "npm install && echo \"Blanket Build Complete\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/splintercode/blanket.git"
+  },
+  "keywords": [
+    "Build",
+    "Tool",
+    "Build",
+    "CLI"
+  ],
+  "author": "Cory Rylan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/splintercode/blanket/issues"
+  },
+  "homepage": "https://github.com/splintercode/blanket#readme",
+  "dependencies": {
+    "vorpal": "^1.11.4"
+  }
+}

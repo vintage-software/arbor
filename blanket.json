@@ -1,0 +1,6 @@
+{
+  "name": "Blanket Project",
+  "tasks": {
+    "build": "npm run build"
+  }
+}
