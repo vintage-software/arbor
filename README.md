@@ -1,6 +1,8 @@
 # Arbor
 A CLI tool to build projects across several platforms in parallel.
 
+[![npm version](https://badge.fury.io/js/arbor.svg)](https://badge.fury.io/js/arbor)
+
 Run `npm install -g arbor` to install. Create a `arbor.json` file with specified tasks. 
 Run `arbor --run build` command, this will run the build task of all project recursively in the directory.
 Ex: `cd my-repos && arbor --run build` builds all of the repos/projects in `my-repos` directory.
