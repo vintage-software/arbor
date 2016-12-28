@@ -1,27 +1,82 @@
 #! /usr/bin/env node
 
-const Vorpal = require('vorpal');
 const fs = require('fs');
 const path = require('path');
+const program = require('commander');
+const Spinner = require('node-spinner');
+const log = require('single-line-log').stdout;
+const chalk = require('chalk');
 
-let program = new Vorpal();
-program.delimiter('blanket$').show();
+// #4CAF50
 
-program.command('build', 'Recursively builds blanket projects').action(function (args, callback) {
-  let self = this;
+program
+  .option('-r, --run <s>', 'Run give arbor tasks in current directory', task)
+  .parse(process.argv);
 
-  walkSync('./').forEach(file => {
-    getBlanketConfig(file).then(config => runBuildTask(config, self));
+function build() {
+  task('build');
+}
+
+function buildProd() {
+  console.log(program);
+  if (program.prod) {
+    task('build--prod');
+  }
+}
+
+let runningTasks = [];
+
+function task(taskName) {
+  renderProgress();
+  walkSync('./').forEach((file, i) => {
+    getConfig(file).then(config => {
+      runningTasks.push({ name: config.name, complete: false });
+
+      runBuildTask(config, config.tasks[taskName]).then(() => {
+        runningTasks.forEach(t => {
+          if (t.name === config.name) {
+            t.complete = true;
+          }
+        });
+      });
+    });
   });
+}
 
-  callback();
-});
+function renderProgress() {
+  var s = Spinner();
 
-function walkSync(dir, filelist = []) { 
+  let ref = setInterval(() => {
+    let out = '';
+
+    runningTasks.forEach(t => {
+      if (t.complete) {
+        out += `${t.name}: ${chalk.green('done!')} \n`;
+      } else {
+        out += `${s.next()} ${t.name}: ${chalk.yellow('building...')} \n`;
+      }
+    });
+
+    log(out);
+
+    let completed = 0;
+    for (let i = 0; i < runningTasks.length; i++) {
+      if (runningTasks[i].complete === true) {
+        completed = completed + 1;
+      }
+
+      if (completed === runningTasks.length) {
+        clearInterval(ref);
+      }
+    }
+  }, 100);
+}
+
+function walkSync(dir, filelist = []) {
   fs.readdirSync(dir).forEach(file => {
     if (fs.statSync(path.join(dir, file)).isDirectory() && !path.join(dir, file).includes('node_modules')) {
       filelist = walkSync(path.join(dir, file), filelist);
-    } else if (path.join(dir, file).endsWith('blanket.json')) {
+    } else if (path.join(dir, file).endsWith('arbor.json')) {
       filelist = filelist.concat(path.join(dir, file));
     }
   });
@@ -29,33 +84,32 @@ function walkSync(dir, filelist = []) {
   return filelist;
 }
 
-function runBuildTask(config, command) {
-  let exec = require('child_process').exec;
-  command.log(`${config.name}: Building...`);
+function runBuildTask(config, buildTask, command) {
+  return new Promise((resolve, reject) => {
+    let exec = require('child_process').exec;
 
-  exec(`cd ${config.projectPath} && ${config.tasks.build}`, {maxBuffer: 1024 * 500}, (error, stdout, stderr) => {
-    if (error) {
-      command.log(`${config.name}: Error`);
-      command.log(error);
-    } else {
-      command.log(`${config.name}: Complete`);
-    }
+    exec(`cd ${config.projectPath} && ${buildTask}`, { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
+      if (error) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
-function getBlanketConfig(filePath) {
+function getConfig(filePath) {
   return new Promise((resolve, reject) => {
     fs.readFile(filePath, (err, data) => {
       if (err) {
         reject(err);
       }
 
-      let config =  JSON.parse(data);
-      filePath = filePath.replace('blanket.json', '');
+      let config = JSON.parse(data);
+      filePath = filePath.replace('arbor.json', '');
       config.projectPath = './' + filePath;
 
       resolve(config);
     });
   });
 }
-

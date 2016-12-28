@@ -1,7 +1,7 @@
 {
-  "name": "blanket",
+  "name": "arbor",
   "version": "0.0.0",
-  "description": "A CLI tool to build projects across several platforms in parallel",
+  "description": "A simple CLI tool to build projects across several platforms in parallel",
   "main": "index.js",
   "bin": {
     "blanket": "index.js"
@@ -28,6 +28,10 @@
   },
   "homepage": "https://github.com/splintercode/blanket#readme",
   "dependencies": {
-    "vorpal": "^1.11.4"
+    "commander": "^2.9.0",
+    "vorpal": "^1.11.4",
+    "node-spinner": "0.0.4",
+    "single-line-log": "1.1.2",
+    "colors": "1.1.2"
   }
 }
