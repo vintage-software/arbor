@@ -37,12 +37,13 @@ function renderProgress() {
 
   let ref = setInterval(() => {
     let out = '';
+    let spinValue = s.next();
 
     runningTasks.forEach(t => {
       if (t.complete) {
         out += `${t.name}: ${chalk.green('done!')} \n`;
       } else {
-        out += `${s.next()} ${t.name}: ${chalk.yellow('building...')} \n`;
+        out += `${spinValue} ${t.name}: ${chalk.yellow('building...')} \n`;
       }
     });
 
