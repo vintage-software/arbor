@@ -13,17 +13,6 @@ program
   .option('-r, --run <s>', 'Run give arbor tasks in current directory', task)
   .parse(process.argv);
 
-function build() {
-  task('build');
-}
-
-function buildProd() {
-  console.log(program);
-  if (program.prod) {
-    task('build--prod');
-  }
-}
-
 let runningTasks = [];
 
 function task(taskName) {

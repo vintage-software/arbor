@@ -4,16 +4,16 @@
   "description": "A simple CLI tool to build projects across several platforms in parallel",
   "main": "index.js",
   "bin": {
-    "blanket": "index.js"
+    "arbor": "index.js"
   },
   "scripts": {
     "start": "node index.js",
-    "build": "npm install && echo \"Blanket Build Complete\"",
+    "build": "npm install && echo \"Arbor Build Complete\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/splintercode/blanket.git"
+    "url": "git+https://github.com/splintercode/arbor.git"
   },
   "keywords": [
     "Build",
@@ -24,9 +24,9 @@
   "author": "Cory Rylan",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/splintercode/blanket/issues"
+    "url": "https://github.com/splintercode/arbor/issues"
   },
-  "homepage": "https://github.com/splintercode/blanket#readme",
+  "homepage": "https://github.com/splintercode/arbor#readme",
   "dependencies": {
     "commander": "^2.9.0",
     "vorpal": "^1.11.4",
