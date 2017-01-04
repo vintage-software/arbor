@@ -1,7 +1,7 @@
 declare module 'node-spinner' {
   class NodeSpinner {
     set(frames: string): void;
-    next(): number;
+    next(): string;
     reset(): void;
   }
 

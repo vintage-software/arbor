@@ -9,30 +9,34 @@ import * as program from 'commander';
 import Spinner = require('node-spinner');
 const log = require('single-line-log').stdout;
 
-import { Config } from './helpers/config';
+import { Command, Config, Task } from './helpers/config';
 import { RunningTask } from './helpers/running-task';
 import { ShellService } from './services/shell.service';
 
 program
-  .option('-r, --run <s>', 'Run give arbor tasks in current directory', task)
+  .option('-r, --run <s>', 'Run give arbor tasks in current directory', run)
   .parse(process.argv);
 
 let runningTasks: RunningTask[] = [];
 
-function task(taskName: string) {
+function run(taskName: string) {
   renderProgress();
   walkSync('./').forEach((file) => {
-    getConfig(file).then((config: Config) => {
-      runningTasks.push({ name: config.name, complete: false });
+    getConfig(file)
+      .then((config: Config) => {
+        let task = config.tasks[taskName];
 
-      runBuildTask(config, config.tasks[taskName]).then(() => {
-        runningTasks.forEach(t => {
-          if (t.name === config.name) {
-            t.complete = true;
-          }
-        });
+        if (task) {
+          let runningTask: RunningTask = { name: config.name, complete: false };
+
+          runningTasks.push(runningTask);
+
+          runTask(config, task, runningTask)
+            .then(() => {
+              runningTasks.find(t => t.name === config.name).complete = true;
+            });
+        }
       });
-    });
   });
 }
 
@@ -43,13 +47,13 @@ function renderProgress() {
     let out = '';
     let spinValue = spinner.next();
 
-    runningTasks.forEach(t => {
-      if (t.complete) {
-        out += `${t.name}: ${chalk.green('done!')} \n`;
+    for (let task of runningTasks) {
+      if (task.complete) {
+        out += `${task.name}: ${chalk.green('done!')} \n`;
       } else {
-        out += `${spinValue} ${t.name}: ${chalk.yellow('building...')} \n`;
+        out += `${spinValue} ${task.name}: ${chalk.yellow(`${task.status ? `${task.status}...` : 'building...'}`)} \n`;
       }
-    });
+    }
 
     log(out);
 
@@ -78,8 +82,32 @@ function walkSync(dir: string, filelist: string[] = []) {
   return filelist;
 }
 
-function runBuildTask(config: Config, buildTask: string) {
-  return ShellService.execute(buildTask, { cwd: config.projectPath, maxBuffer: 1024 * 500 });
+function runTask(config: Config, task: Task, runningTask: RunningTask) {
+  const maxBuffer = 1024 * 500;
+
+  let runTasks = Promise.resolve(undefined);
+
+  if (Array.isArray(task) && task.length > 0 && typeof task[0] === 'string') {
+    for (let command of <string[]>task) {
+      runTasks = runTasks
+        .then(() => ShellService.execute(command, { cwd: config.projectPath, maxBuffer }));
+    }
+  } else if (Array.isArray(task) && task.length > 0) {
+    for (let command of <Command[]>task) {
+      runTasks = runTasks
+        .then(() => {
+          runningTask.status = command.status;
+        })
+        .then(() => {
+          let cwd = command.cwd ?  path.join(config.projectPath, command.cwd) : config.projectPath;
+          return ShellService.execute(command.command, { cwd, maxBuffer: 1024 * 500 });
+        });
+    }
+  } else if (typeof task === 'string') {
+    runTasks = ShellService.execute(task, { cwd: config.projectPath, maxBuffer });
+  }
+
+  return runTasks;
 }
 
 function getConfig(filePath: string) {
