@@ -2,12 +2,10 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as readline from 'readline';
 
 import * as chalk from 'chalk';
 import * as program from 'commander';
-
-import Spinner = require('node-spinner');
-const log = require('single-line-log').stdout;
 
 import { Command, Project, Task } from './helpers/project';
 import { RunningTask } from './helpers/running-task';
@@ -65,21 +63,28 @@ ${result.stderr}
 }
 
 function renderProgress() {
-  let spinner = Spinner();
+  let maxLineLength = 0;
 
   let ref = setInterval(() => {
     let out = '';
-    let spinValue = spinner.next();
 
     for (let task of runningTasks) {
       if (task.success !== undefined) {
         out += `${task.name}: ${task.success ? chalk.green('done!') : chalk.red('failed!')} \n`;
       } else {
-        out += `${spinValue} ${task.name}: ${chalk.yellow(`${task.status ? `${task.status}...` : 'building...'}`)} \n`;
+        out += `${task.name}: ${chalk.yellow(`${task.status ? `${task.status}...` : 'building...'}`)} \n`;
       }
     }
 
-    log(out);
+    out = out
+      .split('\n')
+      .map(line => padRight(line, maxLineLength))
+      .join('\n');
+
+    readline.cursorTo(process.stdout, 0, 0);
+    console.log(out);
+
+    maxLineLength = Math.max.apply(null, out.split('\n').map(line => line.length));
 
     let completed = 0;
     for (let i = 0; i < runningTasks.length; i++) {
@@ -154,4 +159,10 @@ function getProjects(filePath: string) {
       }
     });
   });
+}
+
+function padRight(value: string, length: number) {
+  return value.length >= length ?
+    value :
+    (value + new Array(length - value.length).join(' '));
 }
