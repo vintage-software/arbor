@@ -9,7 +9,7 @@ import * as program from 'commander';
 import Spinner = require('node-spinner');
 const log = require('single-line-log').stdout;
 
-import { Command, Config, Task } from './helpers/config';
+import { Command, Project, Task } from './helpers/project';
 import { RunningTask } from './helpers/running-task';
 import { ExecResult, ShellService } from './services/shell.service';
 
@@ -25,26 +25,27 @@ let runningTasks: RunningTask[] = [];
 function run(taskName: string) {
   renderProgress();
   walkSync('./').forEach((file) => {
-    getConfig(file)
-      .then((config: Config) => {
-        let task = config.tasks[taskName];
+    getProjects(file)
+      .then(projects => {
+        for (let project of projects) {
+          let task = project.tasks[taskName];
 
-        if (task) {
-          let runningTask: RunningTask = { name: config.name };
+          if (task) {
+            let runningTask: RunningTask = { name: project.name };
 
-          runningTasks.push(runningTask);
+            runningTasks.push(runningTask);
 
-          runTask(config, task, runningTask)
-            .then(() => {
-              runningTask.success = true;
-            })
-            .catch((result: ExecResult) => {
-              exitCode = 1;
-              runningTask.success = false;
+            runTask(project, task, runningTask)
+              .then(() => {
+                runningTask.success = true;
+              })
+              .catch((result: ExecResult) => {
+                exitCode = 1;
+                runningTask.success = false;
 
-              let errorText = `
+                let errorText = `
 ------------------------------------------------------------------------------------------
-Project: ${path.join(config.projectPath, 'arbor.json')}
+Project: ${path.join(project.projectPath, 'arbor.json')}
 Task: ${taskName}
 Command: ${result.options.cwd}> ${result.command}
 
@@ -55,8 +56,9 @@ ${result.stdout}
 ${result.stderr}
 ------------------------------------------------------------------------------------------`;
 
-              fs.appendFileSync(errorLogFile, errorText.replace(/\r\n|\r|\n/g, '\r\n'));
-            });
+                fs.appendFileSync(errorLogFile, errorText.replace(/\r\n|\r|\n/g, '\r\n'));
+              });
+          }
         }
       });
   });
@@ -105,7 +107,7 @@ function walkSync(dir: string, filelist: string[] = []) {
   return filelist;
 }
 
-function runTask(config: Config, task: Task, runningTask: RunningTask) {
+function runTask(project: Project, task: Task, runningTask: RunningTask) {
   const maxBuffer = 1024 * 500;
 
   let runTasks = Promise.resolve(undefined);
@@ -113,7 +115,7 @@ function runTask(config: Config, task: Task, runningTask: RunningTask) {
   if (Array.isArray(task) && task.length > 0 && typeof task[0] === 'string') {
     for (let command of <string[]>task) {
       runTasks = runTasks
-        .then(() => ShellService.execute(command, { cwd: config.projectPath, maxBuffer }));
+        .then(() => ShellService.execute(command, { cwd: project.projectPath, maxBuffer }));
     }
   } else if (Array.isArray(task) && task.length > 0) {
     for (let command of <Command[]>task) {
@@ -122,28 +124,34 @@ function runTask(config: Config, task: Task, runningTask: RunningTask) {
           runningTask.status = command.status;
         })
         .then(() => {
-          let cwd = command.cwd ?  path.join(config.projectPath, command.cwd) : config.projectPath;
+          let cwd = command.cwd ?  path.join(project.projectPath, command.cwd) : project.projectPath;
           return ShellService.execute(command.command, { cwd, maxBuffer: 1024 * 500 });
         });
     }
   } else if (typeof task === 'string') {
-    runTasks = ShellService.execute(task, { cwd: config.projectPath, maxBuffer });
+    runTasks = ShellService.execute(task, { cwd: project.projectPath, maxBuffer });
   }
 
   return runTasks;
 }
 
-function getConfig(filePath: string) {
-  return new Promise((resolve, reject) => {
+function getProjects(filePath: string) {
+  return new Promise<Project[]>((resolve, reject) => {
     fs.readFile(filePath, (error, data) => {
       if (error) {
         reject(error);
+      } else {
+        let projectPath = path.resolve(path.dirname(filePath));
+
+        let projects: Project[] = JSON.parse(data.toString());
+        projects = Array.isArray(projects) ? projects : [projects];
+
+        for (let project of projects) {
+          project.projectPath = projectPath;
+        }
+
+        resolve(projects);
       }
-
-      let config: Config = JSON.parse(data.toString());
-      config.projectPath = path.resolve(path.dirname(filePath));
-
-      resolve(config);
     });
   });
 }

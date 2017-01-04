@@ -1,4 +1,4 @@
-export interface Config {
+export interface Project {
   name: string;
   tasks: { [index: string]: Task };
   projectPath: string;
