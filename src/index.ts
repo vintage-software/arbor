@@ -11,10 +11,13 @@ const log = require('single-line-log').stdout;
 
 import { Command, Config, Task } from './helpers/config';
 import { RunningTask } from './helpers/running-task';
-import { ShellService } from './services/shell.service';
+import { ExecResult, ShellService } from './services/shell.service';
+
+const errorLogFile = 'arbor-error.log';
+let exitCode = 0;
 
 program
-  .option('-r, --run <s>', 'Run give arbor tasks in current directory', run)
+  .option('-r, --run <s>', 'Run given arbor tasks in current directory', run)
   .parse(process.argv);
 
 let runningTasks: RunningTask[] = [];
@@ -27,13 +30,32 @@ function run(taskName: string) {
         let task = config.tasks[taskName];
 
         if (task) {
-          let runningTask: RunningTask = { name: config.name, complete: false };
+          let runningTask: RunningTask = { name: config.name };
 
           runningTasks.push(runningTask);
 
           runTask(config, task, runningTask)
             .then(() => {
-              runningTasks.find(t => t.name === config.name).complete = true;
+              runningTask.success = true;
+            })
+            .catch((result: ExecResult) => {
+              exitCode = 1;
+              runningTask.success = false;
+
+              let errorText = `
+------------------------------------------------------------------------------------------
+Project: ${path.join(config.projectPath, 'arbor.json')}
+Task: ${taskName}
+Command: ${result.options.cwd}> ${result.command}
+
+* Standard Output:
+${result.stdout}
+
+* Standard Error:
+${result.stderr}
+------------------------------------------------------------------------------------------`;
+
+              fs.appendFileSync(errorLogFile, errorText.replace(/\r\n|\r|\n/g, '\r\n'));
             });
         }
       });
@@ -48,8 +70,8 @@ function renderProgress() {
     let spinValue = spinner.next();
 
     for (let task of runningTasks) {
-      if (task.complete) {
-        out += `${task.name}: ${chalk.green('done!')} \n`;
+      if (task.success !== undefined) {
+        out += `${task.name}: ${task.success ? chalk.green('done!') : chalk.red('failed!')} \n`;
       } else {
         out += `${spinValue} ${task.name}: ${chalk.yellow(`${task.status ? `${task.status}...` : 'building...'}`)} \n`;
       }
@@ -59,12 +81,13 @@ function renderProgress() {
 
     let completed = 0;
     for (let i = 0; i < runningTasks.length; i++) {
-      if (runningTasks[i].complete === true) {
+      if (runningTasks[i].success !== undefined) {
         completed = completed + 1;
       }
 
       if (completed === runningTasks.length) {
         clearInterval(ref);
+        process.exit(exitCode);
       }
     }
   }, 100);
@@ -112,14 +135,13 @@ function runTask(config: Config, task: Task, runningTask: RunningTask) {
 
 function getConfig(filePath: string) {
   return new Promise((resolve, reject) => {
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        reject(err);
+    fs.readFile(filePath, (error, data) => {
+      if (error) {
+        reject(error);
       }
 
       let config: Config = JSON.parse(data.toString());
-      filePath = filePath.replace('arbor.json', '');
-      config.projectPath = './' + filePath;
+      config.projectPath = path.resolve(path.dirname(filePath));
 
       resolve(config);
     });
