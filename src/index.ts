@@ -1,24 +1,28 @@
-#! /usr/bin/env node
+/// <reference path="types/node-spinner.d.ts" />
 
-const fs = require('fs');
-const path = require('path');
-const program = require('commander');
-const Spinner = require('node-spinner');
+import { exec } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+
+import * as chalk from 'chalk';
+import * as program from 'commander';
+
+import Spinner = require('node-spinner');
 const log = require('single-line-log').stdout;
-const chalk = require('chalk');
 
-// #4CAF50
+import { Config } from './helpers/config';
+import { RunningTask } from './helpers/running-task';
 
 program
   .option('-r, --run <s>', 'Run give arbor tasks in current directory', task)
   .parse(process.argv);
 
-let runningTasks = [];
+let runningTasks: RunningTask[] = [];
 
-function task(taskName) {
+function task(taskName: string) {
   renderProgress();
-  walkSync('./').forEach((file, i) => {
-    getConfig(file).then(config => {
+  walkSync('./').forEach((file) => {
+    getConfig(file).then((config: Config) => {
       runningTasks.push({ name: config.name, complete: false });
 
       runBuildTask(config, config.tasks[taskName]).then(() => {
@@ -33,11 +37,11 @@ function task(taskName) {
 }
 
 function renderProgress() {
-  var s = Spinner();
+  let spinner = Spinner();
 
   let ref = setInterval(() => {
     let out = '';
-    let spinValue = s.next();
+    let spinValue = spinner.next();
 
     runningTasks.forEach(t => {
       if (t.complete) {
@@ -62,7 +66,7 @@ function renderProgress() {
   }, 100);
 }
 
-function walkSync(dir, filelist = []) {
+function walkSync(dir: string, filelist: string[] = []) {
   fs.readdirSync(dir).forEach(file => {
     if (fs.statSync(path.join(dir, file)).isDirectory() && !path.join(dir, file).includes('node_modules')) {
       filelist = walkSync(path.join(dir, file), filelist);
@@ -74,13 +78,11 @@ function walkSync(dir, filelist = []) {
   return filelist;
 }
 
-function runBuildTask(config, buildTask, command) {
+function runBuildTask(config: Config, buildTask: string) {
   return new Promise((resolve, reject) => {
-    let exec = require('child_process').exec;
-
-    exec(`cd ${config.projectPath} && ${buildTask}`, { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
+    exec(`cd ${config.projectPath} && ${buildTask}`, { maxBuffer: 1024 * 500 }, (error) => {
       if (error) {
-        reject(err);
+        reject(error);
       } else {
         resolve();
       }
@@ -88,14 +90,14 @@ function runBuildTask(config, buildTask, command) {
   });
 }
 
-function getConfig(filePath) {
+function getConfig(filePath: string) {
   return new Promise((resolve, reject) => {
     fs.readFile(filePath, (err, data) => {
       if (err) {
         reject(err);
       }
 
-      let config = JSON.parse(data);
+      let config: Config = JSON.parse(data.toString());
       filePath = filePath.replace('arbor.json', '');
       config.projectPath = './' + filePath;
 
