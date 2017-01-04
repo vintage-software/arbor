@@ -1,6 +1,5 @@
 /// <reference path="types/node-spinner.d.ts" />
 
-import { exec } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,6 +11,7 @@ const log = require('single-line-log').stdout;
 
 import { Config } from './helpers/config';
 import { RunningTask } from './helpers/running-task';
+import { ShellService } from './services/shell.service';
 
 program
   .option('-r, --run <s>', 'Run give arbor tasks in current directory', task)
@@ -79,15 +79,7 @@ function walkSync(dir: string, filelist: string[] = []) {
 }
 
 function runBuildTask(config: Config, buildTask: string) {
-  return new Promise((resolve, reject) => {
-    exec(`cd ${config.projectPath} && ${buildTask}`, { maxBuffer: 1024 * 500 }, (error) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
-  });
+  return ShellService.execute(buildTask, { cwd: config.projectPath, maxBuffer: 1024 * 500 });
 }
 
 function getConfig(filePath: string) {
