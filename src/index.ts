@@ -35,29 +35,37 @@ function run(taskNames: string[]) {
   }
 }
 
-function runTask(taskName: string, next: () => void) {
+function runTask(taskName: string, next: () => void, projectNames: string[] = undefined) {
   ConsoleService.log(`Task: ${taskName}`);
 
   if (fs.existsSync(errorLogFile)) {
     fs.unlinkSync(errorLogFile);
   }
 
-  startTasks(taskName)
+  startTasks(taskName, projectNames)
     .then(runningTasks => renderProgress(taskName, runningTasks))
     .then(() => next())
-    .catch(() => {
-      ConsoleService.question('Task failed. Type "y" or "yes" to try again. ')
+    .catch((runningTasks: RunningTask[]) => {
+      ConsoleService.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
         .then(response => {
-          if (response === 'y' || response === 'yes') {
+          if (response === 'y') {
             ConsoleService.log('');
-            runTask(taskName, next);
+            runTask(taskName, nrext);
+          } else if (response === 'f') {
+            let failedProjectNames = runningTasks
+              .filter(task => task.success === false)
+              .map(task => task.projectName);
+
+            ConsoleService.log('');
+            runTask(taskName, next, failedProjectNames);
           }
         });
     });
 }
 
-function startTasks(taskName: string): Promise<RunningTask[]> {
+function startTasks(taskName: string, projectNames: string[] = undefined): Promise<RunningTask[]> {
   return getProjects(getConfigs('./'))
+    .then(projects => projectNames === undefined ? projects : projects.filter(p => projectNames.some(n => p.name === n)))
     .then(projects => {
       let runningTasks: RunningTask[] = [];
 
