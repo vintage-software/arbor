@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 /// <reference path="types/node-spinner.d.ts" />
 
 import * as fs from 'fs';
@@ -50,7 +51,7 @@ function runTask(taskName: string, next: () => void, projectNames: string[] = un
         .then(response => {
           if (response === 'y') {
             ConsoleService.log('');
-            runTask(taskName, nrext);
+            runTask(taskName, next);
           } else if (response === 'f') {
             let failedProjectNames = runningTasks
               .filter(task => task.success === false)
@@ -105,7 +106,7 @@ function runIndividualTask(project: Project, task: Task, runningTask: RunningTas
         runningTask.status = command.status;
       })
       .then(() => {
-        let cwd = command.cwd ?  path.join(project.projectPath, command.cwd) : project.projectPath;
+        let cwd = command.cwd ? path.join(project.projectPath, command.cwd) : project.projectPath;
         return ShellService.execute(command.command, { cwd, maxBuffer });
       });
   }
@@ -189,7 +190,7 @@ function getProjects(configFiles: string[]): Promise<Project[]> {
 }
 
 function readConfig(configFile: string): Promise<Project[]> {
-   return new Promise<Project[]>((resolve, reject) => {
+  return new Promise<Project[]>((resolve, reject) => {
     fs.readFile(configFile, (error, data) => {
       if (error) {
         reject(error);

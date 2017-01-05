@@ -30,4 +30,31 @@ Ex: `cd my-repos && arbor --run build` builds all of the repos/projects in `my-r
 }
 ```
 
+### Multiple projects per configuration
+
+``` javascript
+[
+  {
+    "name": "product api",
+    "tasks": {
+      "build": "msbuild /v:q",
+      "build--prod": "msbuild /p:configuration=release /v:q"
+    }
+  },
+  {
+    "name": "product website",
+    "tasks": {
+      "build": [
+        { "status": "installing", "command": "npm install", "cwd": "./web" },
+        { "status": "building", "command": "npm run build", "cwd": "./web" }
+      ],
+      "build--prod": [
+        { "status": "installing", "command": "npm install", "cwd": "./web" },
+        { "status": "building", "command": "npm run build--prod", "cwd": "./web" }
+      ]
+    }
+  }
+]
+```
+
 ![CLI](arbor.gif)
