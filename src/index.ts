@@ -50,7 +50,7 @@ function runTask(taskName: string, next: () => void, projectNames: string[] = un
         .then(response => {
           if (response === 'y') {
             ConsoleService.log('');
-            runTask(taskName, nrext);
+            runTask(taskName, next);
           } else if (response === 'f') {
             let failedProjectNames = runningTasks
               .filter(task => task.success === false)
