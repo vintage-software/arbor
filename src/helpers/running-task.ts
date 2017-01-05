@@ -1,5 +1,5 @@
 export interface RunningTask {
-  name: string;
+  projectName: string;
   success?: boolean;
   status?: string;
 }

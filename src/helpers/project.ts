@@ -5,9 +5,9 @@ export interface Project {
 }
 
 export interface Command {
-  status: string;
-  cwd: string;
+  status?: string;
+  cwd?: string;
   command: string;
 }
 
-export type Task = string | string[] | Command[];
+export type Task = string | Command | (string | Command)[];
