@@ -14,11 +14,18 @@ import { RunningTask } from './helpers/running-task';
 import { ConsoleService } from './services/console.service';
 import { ExecResult, ShellService } from './services/shell.service';
 
+const packageJSON = require('../package.json');
 const errorLogFile = 'arbor-error.log';
 const infoLogFile = 'arbor-info.log';
 
+let vPos = process.argv.indexOf('-v');
+if (vPos > -1) {
+  process.argv[vPos] = '-V';
+}
+
 program
-  .command('run <tasks...>')
+  .version(packageJSON.version)
+  .command('run <tasks...>!!')
   .action(run);
 
 program.parse(process.argv);
