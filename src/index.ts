@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 /// <reference path="types/dependency-graph.d.ts" />
 
 import * as fs from 'fs';
