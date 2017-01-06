@@ -1,3 +1,7 @@
+#0.0.8
+###Features
+- Check for updates on start (simple compare)
+
 #0.0.7
 ###Bug Fixes
 - Republish for cmd binding bug

@@ -13,24 +13,32 @@ import { Project, Task } from './helpers/project';
 import { RunningTask } from './helpers/running-task';
 import { ConsoleService } from './services/console.service';
 import { ExecResult, ShellService } from './services/shell.service';
+import { getLatestVersion } from './services/version.service';
 
-const packageJSON = require('../package.json');
+const currentVersion = require('../package.json').version;
 const errorLogFile = 'arbor-error.log';
 const infoLogFile = 'arbor-info.log';
 
-let vPos = process.argv.indexOf('-v');
-if (vPos > -1) {
-  process.argv[vPos] = '-V';
+mapVersionFlag();
+
+getLatestVersion().then((version: string) => {
+  showUpdateMessage(version, currentVersion);
+  startArbor();
+}).catch(() => {
+  startArbor();
+});
+
+function startArbor() {
+  program
+    .version(currentVersion)
+    .command('run <tasks...>')
+    .action(run);
+
+  program.parse(process.argv);
 }
 
-program
-  .version(packageJSON.version)
-  .command('run <tasks...>!!')
-  .action(run);
-
-program.parse(process.argv);
-
 function run(taskNames: string[]) {
+  console.log(taskNames);
   ConsoleService.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}\n`);
 
   deleteLogs();
@@ -316,5 +324,23 @@ function deleteLogs() {
 
   if (fs.existsSync(infoLogFile)) {
     fs.unlinkSync(infoLogFile);
+  }
+}
+
+function mapVersionFlag() {
+  // maps lower -v to the version flag of commander
+  let vPos = process.argv.indexOf('-v');
+  if (vPos > -1) {
+    process.argv[vPos] = '-V';
+  }
+}
+
+function showUpdateMessage(latest: string, current: string) {
+  if (current !== latest) {
+    ConsoleService.log(`
+New version available. Run ${chalk.yellow('npm install -g arbor')} to update
+Local Version: ${current}
+Latest Version: ${latest}
+    `);
   }
 }
