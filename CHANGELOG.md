@@ -1,4 +1,4 @@
-#0.0.8
+#0.0.9
 ###Features
 - Check for updates on start (simple compare)
 
