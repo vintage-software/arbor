@@ -1,5 +1,4 @@
-#! /usr/bin/env node
-/// <reference path="types/node-spinner.d.ts" />
+/// <reference path="types/dependency-graph.d.ts" />
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,12 +6,15 @@ import * as path from 'path';
 import * as chalk from 'chalk';
 import * as program from 'commander';
 
+import { DepGraph } from 'dependency-graph';
+
 import { Project, Task } from './helpers/project';
 import { RunningTask } from './helpers/running-task';
 import { ConsoleService } from './services/console.service';
 import { ExecResult, ShellService } from './services/shell.service';
 
 const errorLogFile = 'arbor-error.log';
+const infoLogFile = 'arbor-info.log';
 
 program
   .command('run <tasks...>')
@@ -22,6 +24,8 @@ program.parse(process.argv);
 
 function run(taskNames: string[]) {
   ConsoleService.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}\n`);
+
+  deleteLogs();
 
   if (taskNames.length) {
     let next = () => {
@@ -38,10 +42,6 @@ function run(taskNames: string[]) {
 
 function runTask(taskName: string, next: () => void, projectNames: string[] = undefined) {
   ConsoleService.log(`Task: ${taskName}`);
-
-  if (fs.existsSync(errorLogFile)) {
-    fs.unlinkSync(errorLogFile);
-  }
 
   startTasks(taskName, projectNames)
     .then(runningTasks => renderProgress(taskName, runningTasks))
@@ -66,32 +66,54 @@ function runTask(taskName: string, next: () => void, projectNames: string[] = un
 
 function startTasks(taskName: string, projectNames: string[] = undefined): Promise<RunningTask[]> {
   return getProjects(getConfigs('./'))
+    .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
     .then(projects => projectNames === undefined ? projects : projects.filter(p => projectNames.some(n => p.name === n)))
+    .then(projects => resolveDependencies(taskName, projects))
     .then(projects => {
-      let runningTasks: RunningTask[] = [];
+      let flattenProjects: Project[] = [].concat.apply([], projects);
+      let runningTasks: RunningTask[] = flattenProjects
+        .map(project => ({ projectName: project.name, waiting: true }));
 
-      for (let project of projects) {
-        let task = project.tasks[taskName];
+      if (projects.length) {
+        let next = () => {
+          projects.shift();
 
-        if (task) {
-          let runningTask: RunningTask = { projectName: project.name };
+          if (projects.length) {
+            runProjectGroup(runningTasks, taskName, projects[0], next);
+          }
+        };
 
-          runningTasks.push(runningTask);
-
-          runIndividualTask(project, task, runningTask)
-            .then(() => {
-              runningTask.success = true;
-            }).catch((result: ExecResult) => {
-              handleError(project, runningTask, result);
-            });
-        }
+        runProjectGroup(runningTasks, taskName, projects[0], next);
       }
 
       return runningTasks;
     });
 }
 
-function runIndividualTask(project: Project, task: Task, runningTask: RunningTask): Promise<ExecResult> {
+function runProjectGroup(runningTasks: RunningTask[], taskName: string, projects: Project[], next: () => void) {
+  let taskPromises: Promise<void>[] = [];
+
+  for (let project of projects) {
+    let task = project.tasks[taskName];
+
+    let runningTask = runningTasks.find(t => t.projectName === project.name);
+    runningTask.waiting = false;
+
+    let taskPromise = runProjectTask(project, task, runningTask)
+      .then(() => {
+        runningTask.success = true;
+      })
+      .catch((result: ExecResult) => {
+        handleError(project, runningTask, result);
+      });
+
+    taskPromises.push(taskPromise);
+  }
+
+  Promise.all(taskPromises).then(() => next());
+}
+
+function runProjectTask(project: Project, task: Task, runningTask: RunningTask): Promise<ExecResult> {
   const maxBuffer = 1024 * 500;
 
   task = Array.isArray(task) ? task : [task];
@@ -114,6 +136,52 @@ function runIndividualTask(project: Project, task: Task, runningTask: RunningTas
   return runCommands;
 }
 
+function resolveDependencies(taskName: string, projects: Project[]): Project[][] {
+  let result: Project[][] = [];
+
+  let projectsToConsider = projects;
+  do {
+    let depGraph = new DepGraph<Project>();
+
+    for (let project of projectsToConsider) {
+      depGraph.addNode(project.name);
+    }
+
+    for (let dependant of projectsToConsider) {
+      if (dependant.dependencies && dependant.dependencies.length) {
+        for (let depencency of dependant.dependencies) {
+          if (depGraph.hasNode(depencency)) {
+            depGraph.addDependency(dependant.name, depencency);
+          }
+        }
+      }
+    }
+
+    let leaves = depGraph.overallOrder(true)
+      .map(node => projects.find(project => project.name === node));
+
+    result.push(leaves);
+
+    let addedProjects: Project[] = [].concat.apply([], result);
+    projectsToConsider = projects
+      .filter(project => addedProjects.find(added => added.name === project.name) === undefined);
+  }
+  while (projectsToConsider.length > 0);
+
+  let logInfo = `
+------------------------------------------------------------------------------------------
+Task: ${taskName}
+
+Dependency Graph:
+
+${result.map(group => JSON.stringify(group.map(project => project.name))).join('\n')}
+------------------------------------------------------------------------------------------`;
+
+  log(logInfo, false);
+
+  return result;
+}
+
 function handleError(project: Project, runningTask: RunningTask, result: ExecResult): void {
   runningTask.success = false;
 
@@ -127,7 +195,7 @@ ${result.stdout ? `* Standard Output:\n${result.stdout}\n` : ''}
 ${result.stderr ? `* Standard Error:\n${result.stderr}\n` : ''}
 ------------------------------------------------------------------------------------------`;
 
-  fs.appendFileSync(errorLogFile, errorText.replace(/\r\n|\r|\n/g, '\r\n'));
+  log(errorText, true);
 }
 
 function renderProgress(taskName: string, runningTasks: RunningTask[]): Promise<RunningTask[]> {
@@ -138,7 +206,9 @@ function renderProgress(taskName: string, runningTasks: RunningTask[]): Promise<
       let output = '';
 
       for (let task of runningTasks) {
-        if (task.success !== undefined) {
+        if (task.waiting) {
+          output += `  ${task.projectName}: ${chalk.gray('waiting...')} \n`;
+        } else if (task.success !== undefined) {
           output += `  ${task.projectName}: ${task.success ? chalk.green('done!') : chalk.red('failed!')} \n`;
         } else {
           output += `  ${task.projectName}: ${chalk.yellow(`${task.status ? task.status : defaultStatus}...`)} \n`;
@@ -222,4 +292,21 @@ function getDefaultStatus(taskName: string): string {
   }
 
   return status;
+}
+
+function log(output: string, error: boolean) {
+  let file = error ? errorLogFile : infoLogFile;
+  let outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
+
+  fs.appendFileSync(file, outputToWrite);
+}
+
+function deleteLogs() {
+  if (fs.existsSync(errorLogFile)) {
+    fs.unlinkSync(errorLogFile);
+  }
+
+  if (fs.existsSync(infoLogFile)) {
+    fs.unlinkSync(infoLogFile);
+  }
 }

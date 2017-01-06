@@ -135,6 +135,10 @@ deep-extend@~0.4.0:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/deep-extend/-/deep-extend-0.4.1.tgz#efe4113d08085f4e6f9687759810f807469e2253"
 
+dependency-graph@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/dependency-graph/-/dependency-graph-0.5.0.tgz#71edf7945dbba86c1b19ac982b6afb6476b56dd5"
+
 diff@^3.0.1:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.2.0.tgz#c9ce393a4b7cbd0b058a725c93df299027868ff9"

@@ -1,6 +1,7 @@
 export interface Project {
   name: string;
   tasks: { [index: string]: Task };
+  dependencies: string[];
   projectPath: string;
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "Abor",
+  "name": "arbor",
   "tasks": {
     "build": "npm run build",
     "build--prod": "npm run build && echo 'prod'"
