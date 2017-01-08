@@ -6,8 +6,8 @@ import * as chalk from 'chalk';
 
 import { DepGraph } from 'dependency-graph';
 
-import { Project, Task } from './helpers/project';
-import { RunningTask } from './helpers/running-task';
+import { Project } from './helpers/project';
+import { RunningTask, TaskStatus } from './helpers/running-task';
 import { ConsoleService } from './services/console.service';
 import { LogService } from './services/log.service';
 import { ExecResult, ShellService } from './services/shell.service';
@@ -20,9 +20,15 @@ export class TaskRunner {
     ConsoleService.log(`Task: ${taskName}`);
 
     this.startTasks(taskName, projectNames)
-      .then(runningTasks => this.renderProgress(taskName, runningTasks))
+      .then(runningTasks => this.renderProgress(runningTasks))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
+        if (Array.isArray(runningTasks) === false) {
+          // `runningTasks` is actually an unhandled error.
+          console.log(runningTasks);
+          process.exit(1);
+        }
+
         ConsoleService.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
           .then(response => {
             if (response === 'y') {
@@ -30,8 +36,8 @@ export class TaskRunner {
               this.runTask(taskName, next);
             } else if (response === 'f') {
               let failedProjectNames = runningTasks
-                .filter(task => task.success === false)
-                .map(task => task.projectName);
+                .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
+                .map(runningTask => runningTask.project.name);
 
               ConsoleService.log('');
               this.runTask(taskName, next, failedProjectNames);
@@ -43,54 +49,60 @@ export class TaskRunner {
   private startTasks(taskName: string, projectNames: string[] = undefined): Promise<RunningTask[]> {
     return Promise.resolve(this.projects)
       .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
-      .then(projects => projectNames === undefined ? projects : projects.filter(p => projectNames.some(n => p.name === n)))
-      .then(projects => this.resolveDependencies(taskName, projects))
+      .then(projects => projectNames === undefined ? projects : projects.filter(project => projectNames.some(n => project.name === n)))
+      .then(projects => this.orderProjectsByDependencyGraph(taskName, projects))
       .then(projects => {
-        let flattenProjects: Project[] = [].concat.apply([], projects);
-        let runningTasks: RunningTask[] = flattenProjects
-          .map(project => ({ projectName: project.name, waiting: true }));
+        let runningTasks: RunningTask[] = projects
+          .map(project => ({ project, taskName, status: TaskStatus.Waiting }));
 
-        if (projects.length) {
-          let next = () => {
-            projects.shift();
+        let getRunningTask = (projectName: string) => runningTasks.find(runningTask => runningTask.project.name === projectName);
 
-            if (projects.length) {
-              this.runProjectGroup(taskName, runningTasks, projects[0], next);
+        let next = () => {
+          let waitingTasks = runningTasks
+            .filter(runningTask =>  runningTask.status === TaskStatus.Waiting);
+
+          for (let runningTask of waitingTasks) {
+            let dependencies = (runningTask.project.dependencies ? runningTask.project.dependencies : [])
+              .map(dependency => getRunningTask(dependency))
+              .filter(dependency => dependency !== undefined);
+
+            let allDepenendenciesSucceeded = dependencies.length === 0 ||
+              dependencies.every(dependency => dependency.status === TaskStatus.Success);
+
+            let anyDepenendenciesFailed = dependencies.length > 0 &&
+              dependencies.some(dependency => dependency.status === TaskStatus.Failed);
+
+            let anyDepenendenciesBlocked = dependencies.length > 0 &&
+              dependencies.some(dependency => dependency.status === TaskStatus.DependendecyFailed);
+
+            if (allDepenendenciesSucceeded) {
+              this.startTask(runningTask)
+                .then(() => {
+                  runningTask.status = TaskStatus.Success;
+                  next();
+                })
+                .catch(() => {
+                  runningTask.status = TaskStatus.Failed;
+                  next();
+                });
+            } else if (anyDepenendenciesFailed || anyDepenendenciesBlocked) {
+              runningTask.status = TaskStatus.DependendecyFailed;
             }
-          };
+          }
+        };
 
-          this.runProjectGroup(taskName, runningTasks, projects[0], next);
-        }
+        next();
 
         return runningTasks;
       });
   }
 
-  private runProjectGroup(taskName: string, runningTasks: RunningTask[], projects: Project[], next: () => void) {
-    let taskPromises: Promise<void>[] = [];
-
-    for (let project of projects) {
-      let task = project.tasks[taskName];
-
-      let runningTask = runningTasks.find(t => t.projectName === project.name);
-      runningTask.waiting = false;
-
-      let taskPromise = this.runProjectTask(project, task, runningTask)
-        .then(() => {
-          runningTask.success = true;
-        })
-        .catch((result: ExecResult) => {
-          this.handleError(project, runningTask, result);
-        });
-
-      taskPromises.push(taskPromise);
-    }
-
-    Promise.all(taskPromises).then(() => next());
-  }
-
-  private runProjectTask(project: Project, task: Task, runningTask: RunningTask): Promise<ExecResult> {
+  private startTask(runningTask: RunningTask): Promise<ExecResult> {
     const maxBuffer = 1024 * 500;
+
+    runningTask.status = TaskStatus.InProcess;
+
+    let task = runningTask.project.tasks[runningTask.taskName];
 
     task = Array.isArray(task) ? task : [task];
     let commands = task
@@ -101,48 +113,46 @@ export class TaskRunner {
     for (let command of commands) {
       runCommands = runCommands
         .then(() => {
-          runningTask.status = command.status;
+          runningTask.statusText = command.status;
         })
         .then(() => {
-          let cwd = command.cwd ? path.join(project.projectPath, command.cwd) : project.projectPath;
-          return ShellService.execute(command.command, { cwd, maxBuffer });
+          let cwd = command.cwd ? path.join(runningTask.project.projectPath, command.cwd) : runningTask.project.projectPath;
+          return ShellService.execute(command.command, { cwd, maxBuffer }, runningTask);
         });
     }
 
     return runCommands;
   }
 
-  private resolveDependencies(taskName: string, projects: Project[]): Project[][] {
-    let result: Project[][] = [];
+  private orderProjectsByDependencyGraph(taskName: string, projects: Project[]): Project[] {
+    let dependencyGraph = new DepGraph<Project>();
 
-    let projectsToConsider = projects;
-    do {
-      let depGraph = new DepGraph<Project>();
+    for (let project of projects) {
+      dependencyGraph.addNode(project.name, project);
+    }
 
-      for (let project of projectsToConsider) {
-        depGraph.addNode(project.name);
-      }
-
-      for (let dependant of projectsToConsider) {
-        if (dependant.dependencies && dependant.dependencies.length) {
-          for (let depencency of dependant.dependencies) {
-            if (depGraph.hasNode(depencency)) {
-              depGraph.addDependency(dependant.name, depencency);
-            }
+    for (let dependant of projects) {
+      if (dependant.dependencies && dependant.dependencies.length) {
+        for (let depencency of dependant.dependencies) {
+          if (dependencyGraph.hasNode(depencency)) {
+            dependencyGraph.addDependency(dependant.name, depencency);
           }
         }
       }
-
-      let leaves = depGraph.overallOrder(true)
-        .map(node => projects.find(project => project.name === node));
-
-      result.push(leaves);
-
-      let addedProjects: Project[] = [].concat.apply([], result);
-      projectsToConsider = projects
-        .filter(project => addedProjects.find(added => added.name === project.name) === undefined);
     }
-    while (projectsToConsider.length > 0);
+
+    let order = dependencyGraph.overallOrder();
+
+    let orderedProjects = order
+      .map(projectName => dependencyGraph.getNodeData(projectName));
+
+    let dependencyGraphText = orderedProjects
+      .map(project => ({
+        project: project,
+        orderedDependencies: order.filter(name => project.dependencies &&  project.dependencies.indexOf(name) > -1)
+      }))
+      .map(item => `${item.project.name}: ${JSON.stringify(item.orderedDependencies)}`)
+      .join('\n');
 
     let logInfo = `
 ------------------------------------------------------------------------------------------
@@ -150,59 +160,33 @@ Task: ${taskName}
 
 Dependency Graph:
 
-${result.map(group => JSON.stringify(group.map(project => project.name))).join('\n')}
+${dependencyGraphText}
 ------------------------------------------------------------------------------------------`;
 
     LogService.log(logInfo, false);
 
-    return result;
+    return orderedProjects;
   }
 
-  private handleError(project: Project, runningTask: RunningTask, result: ExecResult): void {
-    runningTask.success = false;
-
-    let errorText = `
-------------------------------------------------------------------------------------------
-Project: ${path.join(project.projectPath, 'arbor.json')}
-Task: ${runningTask.projectName}
-Command: ${result.options.cwd}> ${result.command}
-
-${result.stdout ? `* Standard Output:\n${result.stdout}\n` : ''}
-${result.stderr ? `* Standard Error:\n${result.stderr}\n` : ''}
-------------------------------------------------------------------------------------------`;
-
-    LogService.log(errorText, true);
-  }
-
-  private renderProgress(taskName: string, runningTasks: RunningTask[]): Promise<RunningTask[]> {
+  private renderProgress(runningTasks: RunningTask[]): Promise<RunningTask[]> {
     return new Promise<RunningTask[]>((resolve, reject) => {
-      let defaultStatus = this.getDefaultStatus(taskName);
-
       let interval = setInterval(() => {
-        let output = '';
-
-        for (let task of runningTasks) {
-          if (task.waiting) {
-            output += `  ${task.projectName}: ${chalk.gray('waiting...')} \n`;
-          } else if (task.success !== undefined) {
-            output += `  ${task.projectName}: ${task.success ? chalk.green('done!') : chalk.red('failed!')} \n`;
-          } else {
-            output += `  ${task.projectName}: ${chalk.yellow(`${task.status ? task.status : defaultStatus}...`)} \n`;
-          }
-        }
+        let output = runningTasks
+          .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
+          .join('\n');
 
         ConsoleService.progress(output);
 
         let completedTasks = runningTasks
-          .filter(task => task.success !== undefined);
+          .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
           ConsoleService.finalizeProgress();
           clearInterval(interval);
 
-          let success = runningTasks.every(task => task.success === true);
+          let allTasksSucceeded = runningTasks.every(runningTask => runningTask.status === TaskStatus.Success);
 
-          if (success) {
+          if (allTasksSucceeded) {
             resolve(runningTasks);
           } else {
             reject(runningTasks);
@@ -212,7 +196,35 @@ ${result.stderr ? `* Standard Error:\n${result.stderr}\n` : ''}
     });
   }
 
-  private getDefaultStatus(taskName: string): string {
+  private getStatusText(task: RunningTask) {
+    let defaultStatus = this.getDefaultStatusText(task.taskName);
+
+    let statusText = undefined;
+
+    switch (task.status) {
+      case TaskStatus.Waiting:
+        statusText = chalk.gray('waiting...');
+        break;
+      case TaskStatus.Success:
+        statusText = chalk.green('done!');
+        break;
+      case TaskStatus.Failed:
+        statusText = chalk.red('failed!');
+        break;
+      case TaskStatus.DependendecyFailed:
+        statusText = chalk.red('dependency failed!');
+        break;
+      case TaskStatus.InProcess:
+        statusText = chalk.yellow(`${task.statusText ? task.statusText : defaultStatus}...`);
+        break;
+      default:
+        throw new Error(`Unkown task status '${task.status}' in project '${task.project.name}.'`);
+    }
+
+    return statusText;
+}
+
+  private getDefaultStatusText(taskName: string): string {
     let status = 'processing';
 
     if (taskName.indexOf('install') > -1) {

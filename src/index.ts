@@ -15,7 +15,7 @@ const currentVersion = require('../package.json').version;
 mapVersionFlag();
 
 VersionService.getLatestVersion()
-  .then((version: string) => {
+  .then(version => {
     showUpdateMessage(version, currentVersion);
     startArbor();
   })

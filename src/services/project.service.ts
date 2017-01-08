@@ -13,13 +13,14 @@ export class ProjectService {
   }
 
   private getConfigs(dir: string, filelist: string[] = []): string[] {
-    fs.readdirSync(dir).forEach(file => {
-      if (fs.statSync(path.join(dir, file)).isDirectory() && !path.join(dir, file).includes('node_modules')) {
-        filelist = this.getConfigs(path.join(dir, file), filelist);
-      } else if (path.join(dir, file).endsWith('arbor.json')) {
-        filelist = filelist.concat(path.join(dir, file));
+    let filePaths = fs.readdirSync(dir);
+    for (let filePath of filePaths) {
+      if (fs.statSync(path.join(dir, filePath)).isDirectory() && !path.join(dir, filePath).includes('node_modules')) {
+        filelist = this.getConfigs(path.join(dir, filePath), filelist);
+      } else if (path.join(dir, filePath).endsWith('arbor.json')) {
+        filelist = filelist.concat(path.join(dir, filePath));
       }
-    });
+    }
 
     return filelist;
   }

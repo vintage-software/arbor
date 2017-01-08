@@ -1,6 +1,16 @@
+import { Project } from './project';
+
+export enum TaskStatus {
+  Waiting,
+  InProcess,
+  Success,
+  Failed,
+  DependendecyFailed
+}
+
 export interface RunningTask {
-  projectName: string;
-  success?: boolean;
-  status?: string;
-  waiting: boolean;
+  project: Project;
+  taskName: string;
+  status: TaskStatus;
+  statusText?: string;
 }
