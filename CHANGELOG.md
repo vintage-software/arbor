@@ -1,3 +1,10 @@
+#0.0.10
+###Performance
+- Don't start task if dependency failed for faster exits
+
+###Features
+- Improved logging overall
+
 #0.0.9
 ###Features
 - Check for updates on start (simple compare)
