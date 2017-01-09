@@ -31,7 +31,7 @@ export class ConsoleService {
   }
 
   static finalizeProgress() {
-    ConsoleService.consoleContents += `\n${ConsoleService.currentProgress}\n`;
+    ConsoleService.consoleContents += `\n${ConsoleService.currentProgress}\n\n`;
     ConsoleService.currentProgress = '';
 
     ConsoleService.update();
