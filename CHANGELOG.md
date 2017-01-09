@@ -1,5 +1,6 @@
 #0.0.10
 ###Performance
+- Start task as soon as all dependencies succeed.
 - Don't start task if dependency failed for faster exits
 
 ###Features
