@@ -15,10 +15,11 @@ export class ProjectService {
   private getConfigs(dir: string, filelist: string[] = []): string[] {
     let filePaths = fs.readdirSync(dir);
     for (let filePath of filePaths) {
-      if (fs.statSync(path.join(dir, filePath)).isDirectory() && !path.join(dir, filePath).includes('node_modules')) {
-        filelist = this.getConfigs(path.join(dir, filePath), filelist);
-      } else if (path.join(dir, filePath).endsWith('arbor.json')) {
-        filelist = filelist.concat(path.join(dir, filePath));
+      let absolutePath = path.join(dir, filePath);
+      if (fs.statSync(absolutePath).isDirectory() && !absolutePath.includes('node_modules')) {
+        filelist = this.getConfigs(absolutePath, filelist);
+      } else if (absolutePath.endsWith('arbor.json')) {
+        filelist = filelist.concat(absolutePath);
       }
     }
 
