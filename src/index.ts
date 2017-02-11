@@ -3,6 +3,7 @@
 import * as chalk from 'chalk';
 import * as program from 'commander';
 
+import { ConfigService } from './services/config.service';
 import { ConsoleService } from './services/console.service';
 import { LogService } from './services/log.service';
 import { ProjectService } from './services/project.service';
@@ -24,10 +25,17 @@ VersionService.getLatestVersion()
   });
 
 function startArbor() {
+  program.version(currentVersion);
+
   program
-    .version(currentVersion)
     .command('run <tasks...>')
+    .description('Run a given list of Arbor tasks')
     .action(run);
+
+  program
+    .command('init')
+    .description('Create a new Arbor config')
+    .action(ConfigService.createArborConfig);
 
   program.parse(process.argv);
 }
@@ -42,7 +50,7 @@ function run(taskNames: string[]) {
     let projectService = new ProjectService('./');
 
     projectService.getProjects()
-      .then(projects =>  {
+      .then(projects => {
         let taskRunner = new TaskRunner(projects);
 
         let next = () => {

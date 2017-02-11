@@ -5,8 +5,8 @@
     "lint": "npm run lint",
     "test": "npm run test",
     "build": "npm run build",
-    "build--prod": "npm run build && echo 'prod'",
-    "deploy": "npm run build--prod && npm run deploy"
+    "build--prod": "npm run build--prod",
+    "deploy": "npm run build--prod && npm publish"
   },
   "external": [
     "https://www.npmjs.com/"

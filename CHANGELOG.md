@@ -1,3 +1,7 @@
+#0.1.10
+###Features
+- new `arbor init` to create a simple project `arbor.json` config
+
 #0.0.10
 ###Performance
 - Start task as soon as all dependencies succeed.

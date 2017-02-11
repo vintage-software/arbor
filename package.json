@@ -1,6 +1,6 @@
 {
   "name": "arbor",
-  "version": "0.0.10",
+  "version": "0.1.10",
   "description": "A simple CLI tool to build projects across several platforms in parallel",
   "main": "dist/index.js",
   "bin": {
@@ -11,8 +11,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf dist",
     "build": "tsc --project tsconfig.json",
+    "build--prod": "npm run clean && npm run lint && npm run build",
     "lint": "tslint \"src/**/*.ts\"",
-    "ide-build": "yarn run clean && yarn run lint && yarn run build && echo successfully built"
+    "ide-build": "yarn run clean && yarn run lint && yarn run build && npm link && echo successfully built"
   },
   "repository": {
     "type": "git",
@@ -40,7 +41,7 @@
     "@types/commander": "2.3.31",
     "@types/node": "6.0.56",
     "rimraf": "2.5.4",
-    "tslint": "4.2.0",
-    "typescript": "2.1.4"
+    "tslint": "4.4.2",
+    "typescript": "2.1.6"
   }
 }

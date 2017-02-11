@@ -1,8 +1,8 @@
 import * as readline from 'readline';
 
 export class ConsoleService {
-  private static consoleContents: string = '';
-  private static currentProgress: string = '';
+  private static consoleContents = '';
+  private static currentProgress = '';
 
   static log(output: string) {
     ConsoleService.consoleContents += `${output}\n`;
