@@ -10,5 +10,6 @@
   },
   "external": [
     "https://www.npmjs.com/"
-  ]
+  ],
+  "dependencies": []
 }
