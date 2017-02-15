@@ -1,3 +1,7 @@
+#0.2.0
+###Bug Fixes
+- exit with code 1 when exiting after task failure
+
 #0.1.10
 ###Features
 - new `arbor init` to create a simple project `arbor.json` config
