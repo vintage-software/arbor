@@ -41,6 +41,8 @@ export class TaskRunner {
 
               ConsoleService.log('');
               this.runTask(taskName, next, failedProjectNames);
+            } else {
+              process.exit(1);
             }
           });
       });
