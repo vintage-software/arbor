@@ -1,3 +1,7 @@
+#0.2.2
+###Bug Fixes
+- report non-zero exit codes as errors
+
 #0.2.1
 ###Bug Fixes
 - fix task failure due to buffer overflow
