@@ -13,7 +13,7 @@
     "build": "tsc --project tsconfig.json",
     "build--prod": "npm run clean && npm run lint && npm run build",
     "lint": "tslint \"src/**/*.ts\"",
-    "ide-build": "yarn run clean && yarn run lint && yarn run build && npm link && echo successfully built"
+    "ide-build": "yarn run clean && yarn run lint && yarn run build && echo successfully built"
   },
   "repository": {
     "type": "git",
