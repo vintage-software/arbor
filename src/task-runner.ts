@@ -100,8 +100,6 @@ export class TaskRunner {
   }
 
   private startTask(runningTask: RunningTask): Promise<ExecResult> {
-    const maxBuffer = 1024 * 500;
-
     runningTask.status = TaskStatus.InProcess;
 
     let task = runningTask.project.tasks[runningTask.taskName];
@@ -119,7 +117,7 @@ export class TaskRunner {
         })
         .then(() => {
           let cwd = command.cwd ? path.join(runningTask.project.projectPath, command.cwd) : runningTask.project.projectPath;
-          return ShellService.execute(command.command, { cwd, maxBuffer }, runningTask);
+          return ShellService.execute(command.command, { cwd }, runningTask);
         });
     }
 
