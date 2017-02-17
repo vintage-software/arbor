@@ -7,7 +7,7 @@ import { LogService } from './log.service';
 export interface ExecResult {
   cwd: string;
   command: string;
-  error: Error;
+  error: any;
   stdout: string;
   stderr: string;
 }
@@ -29,25 +29,31 @@ export class ShellService {
       spawnedProcess.stdout.on('data', data => { stdout += ShellService.readData(commandInfo, data); });
       spawnedProcess.stderr.on('data', data => { stderr += ShellService.readData(commandInfo, data); });
 
-      spawnedProcess.on('error', (error: Error) => {
-        let result: ExecResult = { cwd, command, stdout, stderr, error };
+      let done = false;
+      let handleResult = (error: Error, code?: number, signal?: string) => {
+        if (done === false) {
+          let result: ExecResult = { cwd, command, stdout, stderr, error: error };
 
-        let logText = runningTask ? ShellService.getLogText(runningTask, result) : undefined;
-        LogService.log(logText, true);
+          if (code !== 0) {
+            result.error = Object.assign({} , result.error || {}, { code, signal });
+          }
 
-        spawnedProcess.kill('SIGINT');
+          let isError = result.error !== undefined;
+          let logText = runningTask ? ShellService.getLogText(runningTask, result) : undefined;
+          LogService.log(logText, isError);
 
-        reject(result);
-      });
+          if (isError) {
+            reject(result);
+          } else {
+            resolve(result);
+          }
 
-      spawnedProcess.on('exit', () => {
-        let result: ExecResult = { cwd, command, stdout, stderr, error: undefined };
+          done = true;
+        }
+      };
 
-        let logText = runningTask ? ShellService.getLogText(runningTask, result) : undefined;
-        LogService.log(logText, false);
-
-        resolve(result);
-      });
+      spawnedProcess.on('error', (error: Error) => { handleResult(error); });
+      spawnedProcess.on('exit', (code, signal) => { handleResult(undefined, code, signal); });
     });
   }
 
