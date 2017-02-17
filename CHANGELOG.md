@@ -1,3 +1,8 @@
+#0.2.1
+###Bug Fixes
+- fix task failure due to buffer overflow
+- write more error info to log
+
 #0.2.0
 ###Bug Fixes
 - exit with code 1 when exiting after task failure
