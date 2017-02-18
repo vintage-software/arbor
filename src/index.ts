@@ -41,7 +41,6 @@ function startArbor() {
 }
 
 function run(taskNames: string[]) {
-  console.log(taskNames);
   ConsoleService.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}\n`);
 
   LogService.deleteLogs();
