@@ -12,7 +12,14 @@ export interface ExecResult {
   stderr: string;
 }
 
+export interface RunningProcess {
+  runningTask: RunningTask;
+  result: ExecResult;
+}
+
 export class ShellService {
+  static runningProcesses: { [pid: number]: RunningProcess } = {};
+
   static execute(command: string, options?: SpawnOptions, runningTask: RunningTask = undefined): Promise<ExecResult> {
     let cwd = options.cwd || process.cwd();
     let commandInfo = `${cwd}> ${command}`;
@@ -21,18 +28,27 @@ export class ShellService {
       { command: 'cmd', args: ['/c', command] } : { command: 'sh', args: ['-c', command] };
 
     return new Promise<ExecResult>((resolve, reject) => {
+      let result: ExecResult = { cwd, command, stdout: '', stderr: '', error: undefined };
+      let runningProcess: RunningProcess = { runningTask, result };
       let spawnedProcess = spawn(commandAndArgs.command, commandAndArgs.args, options);
 
-      let stdout = '';
-      let stderr = '';
+      ShellService.runningProcesses[spawnedProcess.pid] = runningProcess;
+      ShellService.writeLiveLog();
 
-      spawnedProcess.stdout.on('data', data => { stdout += ShellService.readData(commandInfo, data); });
-      spawnedProcess.stderr.on('data', data => { stderr += ShellService.readData(commandInfo, data); });
+      spawnedProcess.stdout.on('data', data => {
+        result.stdout += ShellService.readData(commandInfo, data);
+        ShellService.writeLiveLog();
+      });
+
+      spawnedProcess.stderr.on('data', data => {
+        result.stderr += ShellService.readData(commandInfo, data);
+        ShellService.writeLiveLog();
+      });
 
       let done = false;
       let handleResult = (error: Error, code?: number, signal?: string) => {
         if (done === false) {
-          let result: ExecResult = { cwd, command, stdout, stderr, error: error };
+          result.error = error;
 
           if (code !== 0) {
             result.error = Object.assign({} , result.error || {}, { code, signal });
@@ -41,6 +57,9 @@ export class ShellService {
           let isError = result.error !== undefined;
           let logText = runningTask ? ShellService.getLogText(runningTask, result) : undefined;
           LogService.log(logText, isError);
+
+          ShellService.runningProcesses[spawnedProcess.pid] = undefined;
+          ShellService.writeLiveLog();
 
           if (isError) {
             reject(result);
@@ -70,6 +89,16 @@ export class ShellService {
     }
 
     return chunk;
+  }
+
+  private static writeLiveLog() {
+    let liveLogText = Object.keys(ShellService.runningProcesses)
+      .map(pid => ShellService.runningProcesses[parseInt(pid, 10)])
+      .filter(runningProcess => runningProcess !== undefined && runningProcess.runningTask !== undefined)
+      .map(runningProcess => ShellService.getLogText(runningProcess.runningTask, runningProcess.result))
+      .join('\n');
+
+    LogService.liveLog(liveLogText);
   }
 
   private static getLogText(runningTask: RunningTask, result: ExecResult) {

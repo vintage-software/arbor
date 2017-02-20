@@ -2,6 +2,7 @@ import * as fs from 'fs';
 
 const errorLogFile = 'arbor-error.log';
 const infoLogFile = 'arbor-info.log';
+const liveLogFile = 'arbor-live.log';
 
 export class LogService {
   static log(output: string, error: boolean) {
@@ -13,13 +14,20 @@ export class LogService {
     }
   }
 
-  static deleteLogs() {
-    if (fs.existsSync(errorLogFile)) {
-      fs.unlinkSync(errorLogFile);
+  static liveLog(output: string) {
+    if (output) {
+      let outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
+      fs.writeFileSync(liveLogFile, outputToWrite);
+    } else if (fs.existsSync(liveLogFile)) {
+      fs.unlinkSync(liveLogFile);
     }
+  }
 
-    if (fs.existsSync(infoLogFile)) {
-      fs.unlinkSync(infoLogFile);
+  static deleteLogs() {
+    for (let file of [errorLogFile, infoLogFile, liveLogFile]) {
+      if (fs.existsSync(file)) {
+        fs.unlinkSync(file);
+      }
     }
   }
 }
