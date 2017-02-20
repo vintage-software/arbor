@@ -1,3 +1,7 @@
+#0.3.0
+###Features
+- live log for running processes
+
 #0.2.2
 ###Bug Fixes
 - report non-zero exit codes as errors
