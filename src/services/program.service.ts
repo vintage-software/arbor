@@ -1,4 +1,3 @@
-import * as chalk from 'chalk';
 import * as program from 'commander';
 
 import { Injectable } from '@angular/core';
@@ -8,9 +7,7 @@ import { ConsoleService } from './console.service';
 import { LogService } from './log.service';
 import { ProjectService } from './project.service';
 import { TaskRunnerService } from './task-runner.service';
-import { VersionService } from './version.service';
-
-const currentVersion = require('../../package.json').version;
+import { currentVersion, VersionService } from './version.service';
 
 @Injectable()
 export class ProgramService {
@@ -25,18 +22,13 @@ export class ProgramService {
 
   start() {
     this.mapVersionFlag();
+    this.registerCommands();
 
-    this.versionService.getLatestVersion()
-      .then(version => {
-        this.showUpdateMessage(version);
-        this.startArbor();
-      })
-      .catch(() => {
-        this.startArbor();
-      });
+    this.versionService.checkForUpdate()
+      .then(() => program.parse(process.argv));
   }
 
-  private startArbor() {
+  private registerCommands() {
     program.version(currentVersion);
 
     program
@@ -48,8 +40,6 @@ export class ProgramService {
       .command('init')
       .description('Create a new Arbor config')
       .action(() => { this.configService.createArborConfig(); });
-
-    program.parse(process.argv);
   }
 
   private run(taskNames: string[]) {
@@ -70,16 +60,6 @@ export class ProgramService {
 
           this.taskRunner.runTask(projects, taskNames[0], next);
         });
-    }
-  }
-
-  private showUpdateMessage(latestVersion: string) {
-    if (currentVersion !== latestVersion) {
-      this.console.log(`
-  New version available. Run ${chalk.yellow('npm install -g arbor')} to update.
-  Local Version: ${currentVersion}
-  Latest Version: ${latestVersion}
-      `);
     }
   }
 
