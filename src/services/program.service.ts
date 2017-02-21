@@ -35,7 +35,8 @@ export class ProgramService {
 
     program
       .command('run <tasks...>')
-      .description('Run a given list of Arbor tasks')
+      .description('Run a given list of Arbor tasks in the current working directory.')
+      .option('--cwd <cwd>', 'Override the current working directory.')
       .option('--live-log', 'Logs process output to arbor-live.log as it is captured.')
       .action((taskNames: string[], options: RunOptions) => this.run(taskNames, options));
 
@@ -46,6 +47,10 @@ export class ProgramService {
   }
 
   private run(taskNames: string[], options: RunOptions) {
+    if (options.cwd && options.cwd.length) {
+      this.chdir(options.cwd);
+    }
+
     this.console.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
     if (options.liveLog) {
@@ -69,6 +74,15 @@ export class ProgramService {
 
           this.taskRunner.runTask(projects, taskNames[0], options, next);
         });
+    }
+  }
+
+  private chdir(cwd: string) {
+    try {
+      process.chdir(cwd);
+    } catch (e) {
+      console.log(`fatal: error changing directory to ${cwd}.`);
+      process.exit(1);
     }
   }
 
