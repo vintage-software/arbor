@@ -2,6 +2,8 @@ import * as program from 'commander';
 
 import { Injectable } from '@angular/core';
 
+import { RunOptions } from '../helpers/run-options';
+
 import { ConfigService } from './config.service';
 import { ConsoleService } from './console.service';
 import { LogService } from './log.service';
@@ -34,7 +36,8 @@ export class ProgramService {
     program
       .command('run <tasks...>')
       .description('Run a given list of Arbor tasks')
-      .action((taskNames: string[]) => this.run(taskNames));
+      .option('--live-log', 'Logs process output to arbor-live.log as it is captured.')
+      .action((taskNames: string[], options: RunOptions) => this.run(taskNames, options));
 
     program
       .command('init')
@@ -42,8 +45,14 @@ export class ProgramService {
       .action(() => { this.configService.createArborConfig(); });
   }
 
-  private run(taskNames: string[]) {
+  private run(taskNames: string[], options: RunOptions) {
     this.console.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+
+    if (options.liveLog) {
+      this.console.log('Live log is enabled.');
+    }
+
+    this.console.log();
 
     this.logService.deleteLogs();
 
@@ -54,11 +63,11 @@ export class ProgramService {
             taskNames.shift();
 
             if (taskNames.length) {
-              this.taskRunner.runTask(projects, taskNames[0], next);
+              this.taskRunner.runTask(projects, taskNames[0], options, next);
             }
           };
 
-          this.taskRunner.runTask(projects, taskNames[0], next);
+          this.taskRunner.runTask(projects, taskNames[0], options, next);
         });
     }
   }

@@ -8,6 +8,7 @@ import { DepGraph } from 'dependency-graph';
 import { Injectable } from '@angular/core';
 
 import { Project } from '../helpers/project';
+import { RunOptions } from '../helpers/run-options';
 import { RunningTask, TaskStatus } from '../helpers/running-task';
 
 import { ConsoleService } from './console.service';
@@ -19,10 +20,10 @@ export class TaskRunnerService {
   constructor(private console: ConsoleService, private logService: LogService, private shell: ShellService) {
   }
 
-  runTask(projects: Project[], taskName: string, next: () => void, projectNames: string[] = undefined) {
+  runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames: string[] = undefined) {
     this.console.log(`Task: ${taskName}`);
 
-    this.startTasks(projects, taskName, projectNames)
+    this.startTasks(projects, taskName, options, projectNames)
       .then(runningTasks => this.renderProgress(runningTasks))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
@@ -36,14 +37,14 @@ export class TaskRunnerService {
           .then(response => {
             if (response === 'y') {
               console.log('');
-              this.runTask(projects, taskName, next);
+              this.runTask(projects, taskName, options, next);
             } else if (response === 'f') {
               let failedProjectNames = runningTasks
                 .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
                 .map(runningTask => runningTask.project.name);
 
               console.log('');
-              this.runTask(projects, taskName, next, failedProjectNames);
+              this.runTask(projects, taskName, options, next, failedProjectNames);
             } else {
               process.exit(1);
             }
@@ -51,7 +52,11 @@ export class TaskRunnerService {
       });
   }
 
-  private startTasks(allProjects: Project[], taskName: string, projectNames: string[] = undefined): Promise<RunningTask[]> {
+  private startTasks(
+    allProjects: Project[],
+    taskName: string,
+    options: RunOptions,
+    projectNames: string[] = undefined): Promise<RunningTask[]> {
     return Promise.resolve(allProjects)
       .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
       .then(projects => projectNames === undefined ? projects : projects.filter(project => projectNames.some(n => project.name === n)))
@@ -81,7 +86,7 @@ export class TaskRunnerService {
               dependencies.some(dependency => dependency.status === TaskStatus.DependendecyFailed);
 
             if (allDepenendenciesSucceeded) {
-              this.startTask(runningTask)
+              this.startTask(runningTask, options)
                 .then(() => {
                   runningTask.status = TaskStatus.Success;
                   next();
@@ -102,7 +107,7 @@ export class TaskRunnerService {
       });
   }
 
-  private startTask(runningTask: RunningTask): Promise<ExecResult> {
+  private startTask(runningTask: RunningTask, options: RunOptions): Promise<ExecResult> {
     runningTask.status = TaskStatus.InProcess;
 
     let task = runningTask.project.tasks[runningTask.taskName];
@@ -123,7 +128,7 @@ export class TaskRunnerService {
 
           return Promise.resolve(undefined)
             .then(() => { runningTask.currentCommand = command; })
-            .then(() => this.shell.execute(command.command, { cwd }, runningTask));
+            .then(() => this.shell.execute(command.command, { cwd }, options.liveLog, runningTask));
         });
     }
 

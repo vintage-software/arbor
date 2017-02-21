@@ -7,8 +7,8 @@ export class ConsoleService {
   private consoleContents = '';
   private currentProgress = '';
 
-  log(output: string) {
-    this.consoleContents += `${output}\n`;
+  log(output?: string) {
+    this.consoleContents += `${output ? output : ''}\n`;
     this.update();
   }
 
