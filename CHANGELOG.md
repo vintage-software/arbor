@@ -1,3 +1,10 @@
+#0.4.3
+###Features
+- version display
+
+###Bug Fixes
+- fix stderr capturing and progress display
+
 #0.4.1
 - rebuild
 
