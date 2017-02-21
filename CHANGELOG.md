@@ -1,3 +1,7 @@
+#0.3.1
+###Bug Fixes
+- minor fix for LF line ending support on unix
+
 #0.3.0
 ###Features
 - live log for running processes
