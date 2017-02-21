@@ -1,9 +1,16 @@
 import * as chalk from 'chalk';
 import * as fs from 'fs';
+
+import { Injectable } from '@angular/core';
+
 import { ConsoleService } from './../services/console.service';
 
+@Injectable()
 export class ConfigService {
-  static createArborConfig() {
+  constructor(private console: ConsoleService) {
+  }
+
+  createArborConfig() {
     const config = `{
   "name": "project-name",
   "tasks": {
@@ -20,7 +27,7 @@ export class ConfigService {
   `;
 
     fs.writeFile('arbor.json', config, 'utf8', () => {
-      ConsoleService.log(`${chalk.green('Created new arbor.json config')}`);
+      this.console.log(`${chalk.green('Created new arbor.json config')}`);
     });
   }
 }

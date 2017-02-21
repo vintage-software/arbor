@@ -1,14 +1,17 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { Injectable } from '@angular/core';
+
 import { Project } from '../helpers/project';
 
+@Injectable()
 export class ProjectService {
-  constructor(private currentWorkingDirectory: string) {
+  constructor() {
   }
 
   getProjects() {
-    let configFiles = this.getConfigs(this.currentWorkingDirectory);
+    let configFiles = this.getConfigs('./');
     return this.readProjects(configFiles);
   }
 
@@ -57,5 +60,4 @@ export class ProjectService {
       });
     });
   }
-
 }

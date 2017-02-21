@@ -1,43 +1,46 @@
 import * as readline from 'readline';
 
-export class ConsoleService {
-  private static consoleContents = '';
-  private static currentProgress = '';
+import { Injectable } from '@angular/core';
 
-  static log(output: string) {
-    ConsoleService.consoleContents += `${output}\n`;
-    ConsoleService.update();
+@Injectable()
+export class ConsoleService {
+  private consoleContents = '';
+  private currentProgress = '';
+
+  log(output: string) {
+    this.consoleContents += `${output}\n`;
+    this.update();
   }
 
-  static question(prompt: string): Promise<string> {
+  question(prompt: string): Promise<string> {
     let reader = readline.createInterface({ input: process.stdin, output: process.stdout });
 
     return new Promise<string>(resolve => {
       reader.question(`\n${prompt}`, response => {
         reader.close();
-        ConsoleService.consoleContents += `${prompt}${response}\n`;
-        ConsoleService.update();
+        this.consoleContents += `${prompt}${response}\n`;
+        this.update();
 
         resolve(response);
       });
     });
   }
 
-  static progress(output: string) {
-    if (ConsoleService.currentProgress !== output) {
-      ConsoleService.currentProgress = output;
-      ConsoleService.update();
+  progress(output: string) {
+    if (this.currentProgress !== output) {
+      this.currentProgress = output;
+      this.update();
     }
   }
 
-  static finalizeProgress() {
-    ConsoleService.consoleContents += `\n${ConsoleService.currentProgress}\n\n`;
-    ConsoleService.currentProgress = '';
+  finalizeProgress() {
+    this.consoleContents += `\n${this.currentProgress}\n\n`;
+    this.currentProgress = '';
 
-    ConsoleService.update();
+    this.update();
   }
 
-  private static update() {
-    console.log(`\x1Bc${ConsoleService.consoleContents}\n${ConsoleService.currentProgress}`.trim());
+  private update() {
+    console.log(`\x1Bc${this.consoleContents}\n${this.currentProgress}`.trim());
   }
 }

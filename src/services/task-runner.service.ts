@@ -1,46 +1,49 @@
-/// <reference path="types/dependency-graph.d.ts" />
-
-import * as path from 'path';
+/// <reference path="../types/dependency-graph.d.ts" />
 
 import * as chalk from 'chalk';
+import * as path from 'path';
 
 import { DepGraph } from 'dependency-graph';
 
-import { Project } from './helpers/project';
-import { RunningTask, TaskStatus } from './helpers/running-task';
-import { ConsoleService } from './services/console.service';
-import { LogService } from './services/log.service';
-import { ExecResult, ShellService } from './services/shell.service';
+import { Injectable } from '@angular/core';
 
-export class TaskRunner {
-  constructor(private projects: Project[]) {
+import { Project } from '../helpers/project';
+import { RunningTask, TaskStatus } from '../helpers/running-task';
+
+import { ConsoleService } from './console.service';
+import { LogService } from './log.service';
+import { ExecResult, ShellService } from './shell.service';
+
+@Injectable()
+export class TaskRunnerService {
+  constructor(private console: ConsoleService, private logService: LogService, private shell: ShellService) {
   }
 
-  runTask(taskName: string, next: () => void, projectNames: string[] = undefined) {
-    ConsoleService.log(`Task: ${taskName}`);
+  runTask(projects: Project[], taskName: string, next: () => void, projectNames: string[] = undefined) {
+    this.console.log(`Task: ${taskName}`);
 
-    this.startTasks(taskName, projectNames)
+    this.startTasks(projects, taskName, projectNames)
       .then(runningTasks => this.renderProgress(runningTasks))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
         if (Array.isArray(runningTasks) === false) {
           // `runningTasks` is actually an unhandled error.
-          console.log(runningTasks);
+          console.log(runningTasks.toString());
           process.exit(1);
         }
 
-        ConsoleService.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
+        this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
           .then(response => {
             if (response === 'y') {
-              ConsoleService.log('');
-              this.runTask(taskName, next);
+              console.log('');
+              this.runTask(projects, taskName, next);
             } else if (response === 'f') {
               let failedProjectNames = runningTasks
                 .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
                 .map(runningTask => runningTask.project.name);
 
-              ConsoleService.log('');
-              this.runTask(taskName, next, failedProjectNames);
+              console.log('');
+              this.runTask(projects, taskName, next, failedProjectNames);
             } else {
               process.exit(1);
             }
@@ -48,8 +51,8 @@ export class TaskRunner {
       });
   }
 
-  private startTasks(taskName: string, projectNames: string[] = undefined): Promise<RunningTask[]> {
-    return Promise.resolve(this.projects)
+  private startTasks(allProjects: Project[], taskName: string, projectNames: string[] = undefined): Promise<RunningTask[]> {
+    return Promise.resolve(allProjects)
       .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
       .then(projects => projectNames === undefined ? projects : projects.filter(project => projectNames.some(n => project.name === n)))
       .then(projects => this.orderProjectsByDependencyGraph(taskName, projects))
@@ -117,7 +120,7 @@ export class TaskRunner {
         })
         .then(() => {
           let cwd = command.cwd ? path.join(runningTask.project.projectPath, command.cwd) : runningTask.project.projectPath;
-          return ShellService.execute(command.command, { cwd }, runningTask);
+          return this.shell.execute(command.command, { cwd }, runningTask);
         });
     }
 
@@ -163,7 +166,7 @@ Dependency Graph:
 ${dependencyGraphText}
 ------------------------------------------------------------------------------------------`;
 
-    LogService.log(logInfo, false);
+    this.logService.log(logInfo, false);
 
     return orderedProjects;
   }
@@ -175,13 +178,13 @@ ${dependencyGraphText}
           .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
           .join('\n');
 
-        ConsoleService.progress(output);
+        this.console.progress(output);
 
         let completedTasks = runningTasks
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
-          ConsoleService.finalizeProgress();
+          this.console.finalizeProgress();
           clearInterval(interval);
 
           let allTasksSucceeded = runningTasks.every(runningTask => runningTask.status === TaskStatus.Success);

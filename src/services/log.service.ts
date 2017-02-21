@@ -1,11 +1,14 @@
 import * as fs from 'fs';
 
+import { Injectable } from '@angular/core';
+
 const errorLogFile = 'arbor-error.log';
 const infoLogFile = 'arbor-info.log';
 const liveLogFile = 'arbor-live.log';
 
+@Injectable()
 export class LogService {
-  static log(output: string, error: boolean) {
+  log(output: string, error: boolean) {
     if (output) {
       let file = error ? errorLogFile : infoLogFile;
       let outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
@@ -14,7 +17,7 @@ export class LogService {
     }
   }
 
-  static liveLog(output: string) {
+  liveLog(output: string) {
     if (output) {
       let outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
       fs.writeFileSync(liveLogFile, outputToWrite);
@@ -23,7 +26,7 @@ export class LogService {
     }
   }
 
-  static deleteLogs() {
+  deleteLogs() {
     for (let file of [errorLogFile, infoLogFile, liveLogFile]) {
       if (fs.existsSync(file)) {
         fs.unlinkSync(file);
