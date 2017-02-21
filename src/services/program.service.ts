@@ -51,7 +51,7 @@ export class ProgramService {
       this.chdir(options.cwd);
     }
 
-    this.console.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+    this.console.log(`Arbor v${currentVersion}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
     if (options.liveLog) {
       this.console.log('Live log is enabled.');
