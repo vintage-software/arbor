@@ -79,7 +79,7 @@ export class ShellService {
     let output = this.readData(commandInfo, data);
 
     if (error) {
-      result.error += output;
+      result.stderr += output;
     } else {
       result.stdout += output;
     }
@@ -113,7 +113,7 @@ export class ShellService {
     let lastLine = output.substring(output.lastIndexOf('\n'));
 
     let stderr = this.formatOutput(result.stderr).trim();
-    let lastErrorLine = output.substring(stderr.lastIndexOf('\n'));
+    let lastErrorLine = stderr.substring(stderr.lastIndexOf('\n'));
 
     runningTask.progressLogLine = progressPattern.test(lastErrorLine) ?
       lastErrorLine.trim() :
