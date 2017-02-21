@@ -1,3 +1,6 @@
+#0.4.1
+- rebuild
+
 #0.4.0
 ###Features
 - live log disabled by default, enabled with --live-log option
