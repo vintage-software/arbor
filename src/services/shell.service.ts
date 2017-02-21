@@ -116,8 +116,16 @@ Task: ${runningTask.taskName}
 Command: ${result.cwd}> ${result.command}
 
 ${result.error ? `* Error:\n${JSON.stringify(result.error)}\n` : ''}
-${result.stdout ? `* Standard Output:\n${result.stdout}\n` : ''}
-${result.stderr ? `* Standard Error:\n${result.stderr}\n` : ''}
+${result.stdout ? `* Standard Output:\n${this.formatOutput(result.stdout)}\n` : ''}
+${result.stderr ? `* Standard Error:\n${this.formatOutput(result.stderr)}\n` : ''}
 ------------------------------------------------------------------------------------------`;
+  }
+
+  private formatOutput(output: string) {
+    const backspaces = /[\b][\b|\s]+[\b]/g;
+
+    return output
+      .replace(backspaces, '\n')
+      .trim();
   }
 }
