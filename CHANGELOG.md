@@ -1,3 +1,10 @@
+#0.4.0
+###Features
+- live log disabled by default, enabled with --live-log option
+- add --cwd option to change current working directory
+- show latest output/progress from running processes
+- replace backspaces in log with newlines
+
 #0.3.1
 ###Bug Fixes
 - minor fix for LF line ending support on unix
