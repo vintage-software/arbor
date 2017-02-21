@@ -9,6 +9,7 @@ export interface Command {
   status?: string;
   cwd?: string;
   command: string;
+  noProgress?: boolean;
 }
 
 export type Task = string | Command | (string | Command)[];

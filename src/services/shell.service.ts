@@ -28,7 +28,6 @@ export class ShellService {
 
   execute(command: string, options?: SpawnOptions, runningTask: RunningTask = undefined): Promise<ExecResult> {
     let cwd = options.cwd || process.cwd();
-    let commandInfo = `${cwd}> ${command}`;
 
     let commandAndArgs = process.platform === 'win32' ?
       { command: 'cmd', args: ['/c', command] } : { command: 'sh', args: ['-c', command] };
@@ -41,15 +40,8 @@ export class ShellService {
       this.runningProcesses[spawnedProcess.pid] = runningProcess;
       this.writeLiveLog();
 
-      spawnedProcess.stdout.on('data', data => {
-        result.stdout += this.readData(commandInfo, data);
-        this.writeLiveLog();
-      });
-
-      spawnedProcess.stderr.on('data', data => {
-        result.stderr += this.readData(commandInfo, data);
-        this.writeLiveLog();
-      });
+      spawnedProcess.stdout.on('data', data => { this.processData(result, runningTask, data, false); });
+      spawnedProcess.stderr.on('data', data => { this.processData(result, runningTask, data, true); });
 
       let done = false;
       let handleResult = (error: Error, code?: number, signal?: string) => {
@@ -82,6 +74,23 @@ export class ShellService {
     });
   }
 
+  private processData(result: ExecResult, runningTask: RunningTask, data: string | Buffer, error: boolean) {
+    let commandInfo = `${result.cwd}> ${result.command}`;
+    let output = this.readData(commandInfo, data);
+
+    if (error) {
+      result.error += output;
+    } else {
+      result.stdout += output;
+    }
+
+    this.writeLiveLog();
+
+    if (runningTask) {
+      this.updateProgressLogLine(runningTask, result);
+    }
+  }
+
   private readData(commandInfo: string, buffer: string | Buffer) {
     let chunk = '';
 
@@ -95,6 +104,20 @@ export class ShellService {
     }
 
     return chunk;
+  }
+
+  private updateProgressLogLine(runningTask: RunningTask, result: ExecResult) {
+    const progressPattern = /[0-9]+%/;
+
+    let output = this.formatOutput(result.stdout).trim();
+    let lastLine = output.substring(output.lastIndexOf('\n'));
+
+    let stderr = this.formatOutput(result.stderr).trim();
+    let lastErrorLine = output.substring(stderr.lastIndexOf('\n'));
+
+    runningTask.progressLogLine = progressPattern.test(lastErrorLine) ?
+      lastErrorLine.trim() :
+      (lastLine ? lastLine.trim() : undefined);
   }
 
   private writeLiveLog() {

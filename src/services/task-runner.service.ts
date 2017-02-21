@@ -120,7 +120,10 @@ export class TaskRunnerService {
         })
         .then(() => {
           let cwd = command.cwd ? path.join(runningTask.project.projectPath, command.cwd) : runningTask.project.projectPath;
-          return this.shell.execute(command.command, { cwd }, runningTask);
+
+          return Promise.resolve(undefined)
+            .then(() => { runningTask.currentCommand = command; })
+            .then(() => this.shell.execute(command.command, { cwd }, runningTask));
         });
     }
 
@@ -199,12 +202,12 @@ ${dependencyGraphText}
     });
   }
 
-  private getStatusText(task: RunningTask) {
-    let defaultStatus = this.getDefaultStatusText(task.taskName);
+  private getStatusText(runningTask: RunningTask) {
+    let defaultStatus = this.getDefaultStatusText(runningTask.taskName);
 
     let statusText = undefined;
 
-    switch (task.status) {
+    switch (runningTask.status) {
       case TaskStatus.Waiting:
         statusText = chalk.gray('waiting...');
         break;
@@ -218,10 +221,14 @@ ${dependencyGraphText}
         statusText = chalk.red('dependency failed!');
         break;
       case TaskStatus.InProcess:
-        statusText = chalk.yellow(`${task.statusText ? task.statusText : defaultStatus}...`);
+        let showProgress = runningTask.currentCommand.noProgress !== true;
+        let status = `${runningTask.statusText ? runningTask.statusText : defaultStatus}...`;
+        let progress = showProgress && runningTask.progressLogLine ? runningTask.progressLogLine : '';
+
+        statusText = `${chalk.yellow(status)} ${chalk.gray(progress)}`;
         break;
       default:
-        throw new Error(`Unkown task status '${task.status}' in project '${task.project.name}.'`);
+        throw new Error(`Unkown task status '${runningTask.status}' in project '${runningTask.project.name}.'`);
     }
 
     return statusText;

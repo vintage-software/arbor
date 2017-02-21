@@ -43,7 +43,7 @@ export class ProgramService {
   }
 
   private run(taskNames: string[]) {
-    this.console.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}\n`);
+    this.console.log(`Arbor: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
     this.logService.deleteLogs();
 
