@@ -1,5 +1,9 @@
 #0.4.3
 ###Features
+- add cwd option to project
+
+#0.4.3
+###Features
 - version display
 
 ###Bug Fixes
