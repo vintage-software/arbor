@@ -124,7 +124,16 @@ export class TaskRunnerService {
           runningTask.statusText = command.status;
         })
         .then(() => {
-          let cwd = command.cwd ? path.join(runningTask.project.projectPath, command.cwd) : runningTask.project.projectPath;
+          let project = runningTask.project;
+          let cwd: string;
+
+          if (command.cwd) {
+            cwd = path.normalize(path.join(runningTask.project.projectPath, command.cwd));
+          } else if (project.cwd) {
+            cwd = path.normalize(path.join(runningTask.project.projectPath, project.cwd));
+          } else {
+            cwd = runningTask.project.projectPath;
+          }
 
           return Promise.resolve(undefined)
             .then(() => { runningTask.currentCommand = command; })
