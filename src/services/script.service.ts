@@ -36,7 +36,8 @@ export class ScriptService {
 goto success
 
 :error
-echo ${this.colorEcho('There was an error in the above task. Exiting...', 31)}
+echo;
+echo ${this.colorEcho('*** There was an error in the above task. Exiting... ***', 31)}
 exit /b 1
 
 :success
