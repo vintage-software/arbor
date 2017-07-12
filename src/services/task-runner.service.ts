@@ -10,11 +10,44 @@ import { RunOptions } from './../helpers/run-options';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
 import { LogService } from './log.service';
+import { ProjectService } from './project.service';
 import { ExecResult, ShellService } from './shell.service';
+import { currentVersion } from './version.service';
 
 @Injectable()
 export class TaskRunnerService {
-  constructor(private console: ConsoleService, private logService: LogService, private shell: ShellService) {
+  constructor(
+    private console: ConsoleService,
+    private logService: LogService,
+    private projectService: ProjectService,
+    private shell: ShellService) {
+  }
+
+  runTasks(taskNames: string[], options: RunOptions) {
+    this.console.log(`Arbor v${currentVersion}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+
+    if (options.liveLog) {
+      this.console.log('Live log is enabled.');
+    }
+
+    this.console.log();
+
+    this.logService.deleteLogs();
+
+    if (taskNames.length) {
+      this.projectService.getProjects()
+        .then(projects => {
+          const next = () => {
+            taskNames.shift();
+
+            if (taskNames.length) {
+              this.runTask(projects, taskNames[0], options, next);
+            }
+          };
+
+          this.runTask(projects, taskNames[0], options, next);
+        });
+    }
   }
 
   runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames?: string[]) {

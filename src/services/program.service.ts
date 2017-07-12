@@ -3,9 +3,6 @@ import * as program from 'commander';
 
 import { RunOptions } from './../helpers/run-options';
 import { ConfigService } from './config.service';
-import { ConsoleService } from './console.service';
-import { LogService } from './log.service';
-import { ProjectService } from './project.service';
 import { TaskRunnerService } from './task-runner.service';
 import { currentVersion, VersionService } from './version.service';
 
@@ -13,9 +10,6 @@ import { currentVersion, VersionService } from './version.service';
 export class ProgramService {
   constructor(
     private configService: ConfigService,
-    private console: ConsoleService,
-    private logService: LogService,
-    private projectService: ProjectService,
     private taskRunner: TaskRunnerService,
     private versionService: VersionService) {
   }
@@ -49,30 +43,7 @@ export class ProgramService {
       this.chdir(options.cwd);
     }
 
-    this.console.log(`Arbor v${currentVersion}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
-
-    if (options.liveLog) {
-      this.console.log('Live log is enabled.');
-    }
-
-    this.console.log();
-
-    this.logService.deleteLogs();
-
-    if (taskNames.length) {
-      this.projectService.getProjects()
-        .then(projects => {
-          const next = () => {
-            taskNames.shift();
-
-            if (taskNames.length) {
-              this.taskRunner.runTask(projects, taskNames[0], options, next);
-            }
-          };
-
-          this.taskRunner.runTask(projects, taskNames[0], options, next);
-        });
-    }
+    this.taskRunner.runTasks(taskNames, options);
   }
 
   private chdir(cwd: string) {
