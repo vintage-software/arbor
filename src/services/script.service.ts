@@ -72,7 +72,7 @@ exit /b`;
 
         script += `
 echo;
-echo ${this.colorEcho(`*** Running task "${taskName} in project "${project.name}" (${cwd}). ***`, 32)}
+echo ${this.colorEcho(`*** Running task "${taskName}" in project "${project.name}" (${cwd}). ***`, 32)}
 echo;
 echo ${this.colorEcho(`${cwd}^> ${command.command}`, 90)}
 pushd ${cwd}
