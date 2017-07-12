@@ -9,8 +9,8 @@ const liveLogFile = 'arbor-live.log';
 export class LogService {
   log(output: string, error: boolean) {
     if (output) {
-      let file = error ? errorLogFile : infoLogFile;
-      let outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
+      const file = error ? errorLogFile : infoLogFile;
+      const outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
 
       fs.appendFileSync(file, outputToWrite);
     }
@@ -18,7 +18,7 @@ export class LogService {
 
   liveLog(output: string) {
     if (output) {
-      let outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
+      const outputToWrite = output.replace(/\r\n|\r|\n/g, '\r\n');
       fs.writeFileSync(liveLogFile, outputToWrite);
     } else if (fs.existsSync(liveLogFile)) {
       fs.unlinkSync(liveLogFile);
@@ -26,7 +26,7 @@ export class LogService {
   }
 
   deleteLogs() {
-    for (let file of [errorLogFile, infoLogFile, liveLogFile]) {
+    for (const file of [errorLogFile, infoLogFile, liveLogFile]) {
       if (fs.existsSync(file)) {
         fs.unlinkSync(file);
       }

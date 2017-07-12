@@ -17,7 +17,7 @@ export class TaskRunnerService {
   constructor(private console: ConsoleService, private logService: LogService, private shell: ShellService) {
   }
 
-  runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames: string[] = undefined) {
+  runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames?: string[]) {
     this.console.log(`Task: ${taskName}`);
 
     this.startTasks(projects, taskName, options, projectNames)
@@ -36,7 +36,7 @@ export class TaskRunnerService {
               console.log('');
               this.runTask(projects, taskName, options, next);
             } else if (response === 'f') {
-              let failedProjectNames = runningTasks
+              const failedProjectNames = runningTasks
                 .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
                 .map(runningTask => runningTask.project.name);
 
@@ -53,33 +53,33 @@ export class TaskRunnerService {
     allProjects: Project[],
     taskName: string,
     options: RunOptions,
-    projectNames: string[] = undefined): Promise<RunningTask[]> {
+    projectNames?: string[]): Promise<RunningTask[]> {
     return Promise.resolve(allProjects)
       .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
       .then(projects => projectNames === undefined ? projects : projects.filter(project => projectNames.some(n => project.name === n)))
       .then(projects => this.orderProjectsByDependencyGraph(taskName, projects))
       .then(projects => {
-        let runningTasks: RunningTask[] = projects
+        const runningTasks: RunningTask[] = projects
           .map(project => ({ project, taskName, status: TaskStatus.Waiting }));
 
-        let getRunningTask = (projectName: string) => runningTasks.find(runningTask => runningTask.project.name === projectName);
+        const getRunningTask = (projectName: string) => runningTasks.find(runningTask => runningTask.project.name === projectName);
 
-        let next = () => {
-          let waitingTasks = runningTasks
+        const next = () => {
+          const waitingTasks = runningTasks
             .filter(runningTask =>  runningTask.status === TaskStatus.Waiting);
 
-          for (let runningTask of waitingTasks) {
-            let dependencies = (runningTask.project.dependencies ? runningTask.project.dependencies : [])
+          for (const runningTask of waitingTasks) {
+            const dependencies = (runningTask.project.dependencies ? runningTask.project.dependencies : [])
               .map(dependency => getRunningTask(dependency))
               .filter(dependency => dependency !== undefined);
 
-            let allDepenendenciesSucceeded = dependencies.length === 0 ||
+            const allDepenendenciesSucceeded = dependencies.length === 0 ||
               dependencies.every(dependency => dependency.status === TaskStatus.Success);
 
-            let anyDepenendenciesFailed = dependencies.length > 0 &&
+            const anyDepenendenciesFailed = dependencies.length > 0 &&
               dependencies.some(dependency => dependency.status === TaskStatus.Failed);
 
-            let anyDepenendenciesBlocked = dependencies.length > 0 &&
+            const anyDepenendenciesBlocked = dependencies.length > 0 &&
               dependencies.some(dependency => dependency.status === TaskStatus.DependendecyFailed);
 
             if (allDepenendenciesSucceeded) {
@@ -110,18 +110,18 @@ export class TaskRunnerService {
     let task = runningTask.project.tasks[runningTask.taskName];
 
     task = Array.isArray(task) ? task : [task];
-    let commands = task
+    const commands = task
       .map(command => typeof command === 'string' ? { command } : command);
 
     let runCommands = Promise.resolve(undefined);
 
-    for (let command of commands) {
+    for (const command of commands) {
       runCommands = runCommands
         .then(() => {
           runningTask.statusText = command.status;
         })
         .then(() => {
-          let project = runningTask.project;
+          const project = runningTask.project;
           let cwd: string;
 
           if (command.cwd) {
@@ -142,15 +142,15 @@ export class TaskRunnerService {
   }
 
   private orderProjectsByDependencyGraph(taskName: string, projects: Project[]): Project[] {
-    let dependencyGraph = new DepGraph<Project>();
+    const dependencyGraph = new DepGraph<Project>();
 
-    for (let project of projects) {
+    for (const project of projects) {
       dependencyGraph.addNode(project.name, project);
     }
 
-    for (let dependant of projects) {
+    for (const dependant of projects) {
       if (dependant.dependencies && dependant.dependencies.length) {
-        for (let depencency of dependant.dependencies) {
+        for (const depencency of dependant.dependencies) {
           if (dependencyGraph.hasNode(depencency)) {
             dependencyGraph.addDependency(dependant.name, depencency);
           }
@@ -158,12 +158,12 @@ export class TaskRunnerService {
       }
     }
 
-    let order = dependencyGraph.overallOrder();
+    const order = dependencyGraph.overallOrder();
 
-    let orderedProjects = order
+    const orderedProjects = order
       .map(projectName => dependencyGraph.getNodeData(projectName));
 
-    let dependencyGraphText = orderedProjects
+    const dependencyGraphText = orderedProjects
       .map(project => ({
         project: project,
         orderedDependencies: order.filter(name => project.dependencies &&  project.dependencies.indexOf(name) > -1)
@@ -171,7 +171,7 @@ export class TaskRunnerService {
       .map(item => `${item.project.name}: ${JSON.stringify(item.orderedDependencies)}`)
       .join('\n');
 
-    let logInfo = `
+    const logInfo = `
 ------------------------------------------------------------------------------------------
 Task: ${taskName}
 
@@ -187,21 +187,21 @@ ${dependencyGraphText}
 
   private renderProgress(runningTasks: RunningTask[]): Promise<RunningTask[]> {
     return new Promise<RunningTask[]>((resolve, reject) => {
-      let interval = setInterval(() => {
-        let output = runningTasks
+      const interval = setInterval(() => {
+        const output = runningTasks
           .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
           .join('\n');
 
         this.console.progress(output);
 
-        let completedTasks = runningTasks
+        const completedTasks = runningTasks
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
           this.console.finalizeProgress();
           clearInterval(interval);
 
-          let allTasksSucceeded = runningTasks.every(runningTask => runningTask.status === TaskStatus.Success);
+          const allTasksSucceeded = runningTasks.every(runningTask => runningTask.status === TaskStatus.Success);
 
           if (allTasksSucceeded) {
             resolve(runningTasks);
@@ -214,9 +214,9 @@ ${dependencyGraphText}
   }
 
   private getStatusText(runningTask: RunningTask) {
-    let defaultStatus = this.getDefaultStatusText(runningTask.taskName);
+    const defaultStatus = this.getDefaultStatusText(runningTask.taskName);
 
-    let statusText = undefined;
+    let statusText;
 
     switch (runningTask.status) {
       case TaskStatus.Waiting:
@@ -232,9 +232,9 @@ ${dependencyGraphText}
         statusText = chalk.red('dependency failed!');
         break;
       case TaskStatus.InProcess:
-        let showProgress = runningTask.currentCommand.noProgress !== true;
-        let status = `${runningTask.statusText ? runningTask.statusText : defaultStatus}...`;
-        let progress = showProgress && runningTask.progressLogLine ? runningTask.progressLogLine : '';
+        const showProgress = runningTask.currentCommand.noProgress !== true;
+        const status = `${runningTask.statusText ? runningTask.statusText : defaultStatus}...`;
+        const progress = showProgress && runningTask.progressLogLine ? runningTask.progressLogLine : '';
 
         statusText = `${chalk.yellow(status)} ${chalk.gray(progress)}`;
         break;

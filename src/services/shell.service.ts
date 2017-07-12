@@ -25,16 +25,16 @@ export class ShellService {
   constructor(private logService: LogService) {
   }
 
-  execute(command: string, options?: SpawnOptions, liveLog = false, runningTask: RunningTask = undefined): Promise<ExecResult> {
-    let cwd = options.cwd || process.cwd();
+  execute(command: string, options?: SpawnOptions, liveLog = false, runningTask?: RunningTask): Promise<ExecResult> {
+    const cwd = options.cwd || process.cwd();
 
-    let commandAndArgs = process.platform === 'win32' ?
+    const commandAndArgs = process.platform === 'win32' ?
       { command: 'cmd', args: ['/c', command] } : { command: 'sh', args: ['-c', command] };
 
     return new Promise<ExecResult>((resolve, reject) => {
-      let result: ExecResult = { cwd, command, stdout: '', stderr: '', error: undefined };
-      let runningProcess: RunningProcess = { runningTask, result };
-      let spawnedProcess = spawn(commandAndArgs.command, commandAndArgs.args, options);
+      const result: ExecResult = { cwd, command, stdout: '', stderr: '', error: undefined };
+      const runningProcess: RunningProcess = { runningTask, result };
+      const spawnedProcess = spawn(commandAndArgs.command, commandAndArgs.args, options);
 
       this.runningProcesses[spawnedProcess.pid] = runningProcess;
       this.writeLiveLog(liveLog);
@@ -43,7 +43,7 @@ export class ShellService {
       spawnedProcess.stderr.on('data', data => { this.processData(result, liveLog, runningTask, data, true); });
 
       let done = false;
-      let handleResult = (error: Error, code?: number, signal?: string) => {
+      const handleResult = (error: Error, code?: number, signal?: string) => {
         if (done === false) {
           result.error = error;
 
@@ -51,8 +51,8 @@ export class ShellService {
             result.error = Object.assign({} , result.error || {}, { code, signal });
           }
 
-          let isError = result.error !== undefined;
-          let logText = runningTask ? this.getLogText(runningTask, result) : undefined;
+          const isError = result.error !== undefined;
+          const logText = runningTask ? this.getLogText(runningTask, result) : undefined;
           this.logService.log(logText, isError);
 
           this.runningProcesses[spawnedProcess.pid] = undefined;
@@ -74,8 +74,8 @@ export class ShellService {
   }
 
   private processData(result: ExecResult, liveLog: boolean, runningTask: RunningTask, data: string | Buffer, error: boolean) {
-    let commandInfo = `${result.cwd}> ${result.command}`;
-    let output = this.readData(commandInfo, data);
+    const commandInfo = `${result.cwd}> ${result.command}`;
+    const output = this.readData(commandInfo, data);
 
     if (error) {
       result.stderr += output;
@@ -108,11 +108,11 @@ export class ShellService {
   private updateProgressLogLine(runningTask: RunningTask, result: ExecResult) {
     const progressPattern = /[0-9]+%/;
 
-    let output = this.formatOutput(result.stdout).trim();
-    let lastLine = output.substring(output.lastIndexOf('\n'));
+    const output = this.formatOutput(result.stdout).trim();
+    const lastLine = output.substring(output.lastIndexOf('\n'));
 
-    let stderr = this.formatOutput(result.stderr).trim();
-    let lastErrorLine = stderr.substring(stderr.lastIndexOf('\n'));
+    const stderr = this.formatOutput(result.stderr).trim();
+    const lastErrorLine = stderr.substring(stderr.lastIndexOf('\n'));
 
     runningTask.progressLogLine = progressPattern.test(lastErrorLine) ?
       lastErrorLine.trim() :
@@ -121,7 +121,7 @@ export class ShellService {
 
   private writeLiveLog(enabled: boolean) {
     if (enabled) {
-      let liveLogText = Object.keys(this.runningProcesses)
+      const liveLogText = Object.keys(this.runningProcesses)
         .map(pid => this.runningProcesses[parseInt(pid, 10)])
         .filter(runningProcess => runningProcess !== undefined && runningProcess.runningTask !== undefined)
         .map(runningProcess => this.getLogText(runningProcess.runningTask, runningProcess.result))

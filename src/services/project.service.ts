@@ -10,14 +10,14 @@ export class ProjectService {
   }
 
   getProjects() {
-    let configFiles = this.getConfigs('./');
+    const configFiles = this.getConfigs('./');
     return this.readProjects(configFiles);
   }
 
   private getConfigs(dir: string, filelist: string[] = []): string[] {
-    let filePaths = fs.readdirSync(dir);
-    for (let filePath of filePaths) {
-      let absolutePath = path.join(dir, filePath);
+    const filePaths = fs.readdirSync(dir);
+    for (const filePath of filePaths) {
+      const absolutePath = path.join(dir, filePath);
       if (fs.statSync(absolutePath).isDirectory() && !absolutePath.includes('node_modules')) {
         filelist = this.getConfigs(absolutePath, filelist);
       } else if (absolutePath.endsWith('arbor.json')) {
@@ -30,7 +30,7 @@ export class ProjectService {
 
   private readProjects(configFiles: string[]): Promise<Project[]> {
     return new Promise<Project[]>((resolve, reject) => {
-      let promises = configFiles
+      const promises = configFiles
         .map(configFile => this.readConfig(configFile));
 
       Promise.all(promises)
@@ -45,12 +45,12 @@ export class ProjectService {
         if (error) {
           reject(error);
         } else {
-          let projectPath = path.resolve(path.dirname(configFile));
+          const projectPath = path.resolve(path.dirname(configFile));
 
           let projects: Project[] = JSON.parse(data.toString());
           projects = Array.isArray(projects) ? projects : [projects];
 
-          for (let project of projects) {
+          for (const project of projects) {
             project.projectPath = projectPath;
           }
 

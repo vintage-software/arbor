@@ -62,7 +62,7 @@ export class ProgramService {
     if (taskNames.length) {
       this.projectService.getProjects()
         .then(projects => {
-          let next = () => {
+          const next = () => {
             taskNames.shift();
 
             if (taskNames.length) {
@@ -86,7 +86,7 @@ export class ProgramService {
 
   private mapVersionFlag() {
     // maps lower -v to the version flag of commander
-    let vPos = process.argv.indexOf('-v');
+    const vPos = process.argv.indexOf('-v');
     if (vPos > -1) {
       process.argv[vPos] = '-V';
     }

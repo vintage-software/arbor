@@ -13,7 +13,7 @@ export class ConsoleService {
   }
 
   question(prompt: string): Promise<string> {
-    let reader = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const reader = readline.createInterface({ input: process.stdin, output: process.stdout });
 
     return new Promise<string>(resolve => {
       reader.question(`\n${prompt}`, response => {
