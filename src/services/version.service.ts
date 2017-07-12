@@ -1,11 +1,10 @@
-import * as chalk from 'chalk';
-
 import { Injectable } from '@angular/core';
+import * as chalk from 'chalk';
 
 import { ConsoleService } from './console.service';
 import { ShellService } from './shell.service';
 
-export const currentVersion = require('../../package.json').version;
+export const currentVersion = require('./../../package.json').version;
 
 @Injectable()
 export class VersionService {

@@ -1,9 +1,7 @@
+import { Injectable } from '@angular/core';
 import * as program from 'commander';
 
-import { Injectable } from '@angular/core';
-
-import { RunOptions } from '../helpers/run-options';
-
+import { RunOptions } from './../helpers/run-options';
 import { ConfigService } from './config.service';
 import { ConsoleService } from './console.service';
 import { LogService } from './log.service';

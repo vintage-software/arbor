@@ -1,16 +1,13 @@
 /// <reference path="../types/dependency-graph.d.ts" />
 
+import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
+import { DepGraph } from 'dependency-graph';
 import * as path from 'path';
 
-import { DepGraph } from 'dependency-graph';
-
-import { Injectable } from '@angular/core';
-
-import { Project } from '../helpers/project';
-import { RunOptions } from '../helpers/run-options';
-import { RunningTask, TaskStatus } from '../helpers/running-task';
-
+import { Project } from './../helpers/project';
+import { RunOptions } from './../helpers/run-options';
+import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
 import { LogService } from './log.service';
 import { ExecResult, ShellService } from './shell.service';

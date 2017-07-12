@@ -1,9 +1,8 @@
+import { Injectable } from '@angular/core';
 import { spawn, SpawnOptions } from 'child_process';
 import * as path from 'path';
 
-import { Injectable } from '@angular/core';
-
-import { RunningTask } from '../helpers/running-task';
+import { RunningTask } from './../helpers/running-task';
 import { LogService } from './log.service';
 
 export interface ExecResult {

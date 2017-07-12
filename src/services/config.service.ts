@@ -1,7 +1,6 @@
+import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 import * as fs from 'fs';
-
-import { Injectable } from '@angular/core';
 
 import { ConsoleService } from './../services/console.service';
 

@@ -1,9 +1,8 @@
+import { Injectable } from '@angular/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Injectable } from '@angular/core';
-
-import { Project } from '../helpers/project';
+import { Project } from './../helpers/project';
 
 @Injectable()
 export class ProjectService {
