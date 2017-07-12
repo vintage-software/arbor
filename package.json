@@ -13,7 +13,9 @@
     "lint": "tslint --project tsconfig.json --type-check",
     "prebuild": "run-s clean lint",
     "postbuild": "echo successfully built",
-    "build": "tsc --project tsconfig.json"
+    "build": "tsc --project tsconfig.json",
+    "patch-release": "npm run build && npm version patch && npm publish && git push --follow-tags",
+    "minor-release": "npm run build && npm version minor && npm publish && git push --follow-tags"
   },
   "repository": {
     "type": "git",
