@@ -28,17 +28,21 @@ export class ProgramService {
     program.version(currentVersion);
 
     program
+      .command('init')
+      .description('Create a new Arbor config')
+      .action(() => { this.configService.createArborConfig(); });
+
+    program
       .command('run <tasks...>')
       .description('Run a given list of Arbor tasks in the current working directory.')
       .option('--cwd <cwd>', 'Override the current working directory.')
-      .option('--script', 'Output a build script.')
       .option('--live-log', 'Logs process output to arbor-live.log as it is captured.')
       .action((taskNames: string[], options: RunOptions) => this.run(taskNames, options));
 
     program
-      .command('init')
-      .description('Create a new Arbor config')
-      .action(() => { this.configService.createArborConfig(); });
+      .command('script <tasks...>')
+      .description('Generate a script to run the given list of Arbor tasks in the current working directory.')
+      .action((taskNames: string[]) => this.script(taskNames));
   }
 
   private run(taskNames: string[], options: RunOptions) {
@@ -46,11 +50,11 @@ export class ProgramService {
       this.chdir(options.cwd);
     }
 
-    if (options.script) {
-      this.scriptService.generateScript(taskNames);
-    } else {
-      this.taskRunner.runTasks(taskNames, options);
-    }
+    this.taskRunner.runTasks(taskNames, options);
+  }
+
+  private script(taskNames: string[]) {
+    this.scriptService.generateScript(taskNames);
   }
 
   private chdir(cwd: string) {
