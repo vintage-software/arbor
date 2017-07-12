@@ -10,10 +10,10 @@
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf dist",
-    "build": "tsc --project tsconfig.json",
-    "build--prod": "npm run clean && npm run lint && npm run build",
     "lint": "tslint --project tsconfig.json --type-check",
-    "ide-build": "yarn run clean && yarn run lint && yarn run build && echo successfully built"
+    "prebuild": "run-s clean lint",
+    "postbuild": "echo successfully built",
+    "build": "tsc --project tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -45,6 +45,7 @@
     "@types/chalk": "0.4.31",
     "@types/commander": "2.9.1",
     "@types/node": "6.0.81",
+    "npm-run-all": "4.0.2",
     "rimraf": "2.6.1",
     "tslint": "5.5.0",
     "typescript": "2.4.1"

@@ -21,7 +21,7 @@
     },
     {
       "taskName": "build",
-      "args": ["run", "ide-build"]
+      "args": ["run", "build"]
     }
   ]
 }
