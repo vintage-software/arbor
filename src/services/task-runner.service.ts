@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 import * as path from 'path';
 
+import { RunOptions } from './../helpers/options';
 import { Project } from './../helpers/project';
-import { RunOptions } from './../helpers/run-options';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
 import { DependencyGraphService } from './dependency-graph.service';

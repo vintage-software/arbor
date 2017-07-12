@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
+import * as chalk from 'chalk';
+import { writeFileSync } from 'fs';
 import * as path from 'path';
 
+import { ScriptOptions } from './../helpers/options';
 import { Project } from './../helpers/project';
 import { DependencyGraphService } from './dependency-graph.service';
 import { ProjectService } from './project.service';
+import { currentVersion } from './version.service';
 
 @Injectable()
 export class ScriptService {
@@ -11,18 +15,24 @@ export class ScriptService {
     private dependencyGraphService: DependencyGraphService,
     private projectService: ProjectService) { }
 
-  generateScript(taskNames: string[]) {
+  generateScript(taskNames: string[], options: ScriptOptions) {
+    if (options.output === undefined) {
+      console.log(chalk.red('output path is required.'));
+    }
+
     if (taskNames.length) {
+      console.log(`Arbor v${currentVersion}: scripting tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+
       this.projectService.getProjects()
         .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))
         .then(projects => {
-          console.log('echo off');
+          let script = 'echo off';
 
           for (const taskName of taskNames) {
-            this.generateTaskScript(taskName, projects);
+            script += this.generateTaskScript(taskName, projects);
           }
 
-          console.log(`
+          script += `
 goto success
 
 :error
@@ -30,12 +40,16 @@ echo ${this.colorEcho('There was an error in the above task. Exiting...', 31)}
 exit /b 1
 
 :success
-exit /b`);
+exit /b`;
+
+          writeFileSync(options.output, script);
         });
     }
   }
 
   private generateTaskScript(taskName: string, allProjects: Project[]) {
+    let script = '';
+
     const projects = allProjects.filter(project => project.tasks[taskName] !== undefined);
 
     for (const project of projects) {
@@ -56,7 +70,7 @@ exit /b`);
           cwd = project.projectPath;
         }
 
-        console.log(`
+        script += `
 echo;
 echo ${this.colorEcho(`*** Running task "${taskName} in project "${project.name}" (${cwd}). ***`, 32)}
 echo;
@@ -64,9 +78,11 @@ echo ${this.colorEcho(`${cwd}^> ${command.command}`, 90)}
 pushd ${cwd}
 call ${command.command}
 if errorlevel 1 goto error
-popd`);
+popd`;
       }
     }
+
+    return script;
   }
 
   private colorEcho(message: string, color: number) {

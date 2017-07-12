@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as program from 'commander';
 
-import { RunOptions } from './../helpers/run-options';
+import { RunOptions, ScriptOptions } from './../helpers/options';
 import { ConfigService } from './config.service';
 import { ScriptService } from './script.service';
 import { TaskRunnerService } from './task-runner.service';
@@ -42,7 +42,8 @@ export class ProgramService {
     program
       .command('script <tasks...>')
       .description('Generate a script to run the given list of Arbor tasks in the current working directory.')
-      .action((taskNames: string[]) => this.script(taskNames));
+      .option('--output <output>', 'Filename to write script. Required.')
+      .action((taskNames: string[], options: ScriptOptions) => this.script(taskNames, options));
   }
 
   private run(taskNames: string[], options: RunOptions) {
@@ -53,8 +54,8 @@ export class ProgramService {
     this.taskRunner.runTasks(taskNames, options);
   }
 
-  private script(taskNames: string[]) {
-    this.scriptService.generateScript(taskNames);
+  private script(taskNames: string[], options: ScriptOptions) {
+    this.scriptService.generateScript(taskNames, options);
   }
 
   private chdir(cwd: string) {
