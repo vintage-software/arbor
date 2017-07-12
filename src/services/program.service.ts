@@ -3,6 +3,7 @@ import * as program from 'commander';
 
 import { RunOptions } from './../helpers/run-options';
 import { ConfigService } from './config.service';
+import { ScriptService } from './script.service';
 import { TaskRunnerService } from './task-runner.service';
 import { currentVersion, VersionService } from './version.service';
 
@@ -10,6 +11,7 @@ import { currentVersion, VersionService } from './version.service';
 export class ProgramService {
   constructor(
     private configService: ConfigService,
+    private scriptService: ScriptService,
     private taskRunner: TaskRunnerService,
     private versionService: VersionService) {
   }
@@ -29,6 +31,7 @@ export class ProgramService {
       .command('run <tasks...>')
       .description('Run a given list of Arbor tasks in the current working directory.')
       .option('--cwd <cwd>', 'Override the current working directory.')
+      .option('--script', 'Output a build script.')
       .option('--live-log', 'Logs process output to arbor-live.log as it is captured.')
       .action((taskNames: string[], options: RunOptions) => this.run(taskNames, options));
 
@@ -43,7 +46,11 @@ export class ProgramService {
       this.chdir(options.cwd);
     }
 
-    this.taskRunner.runTasks(taskNames, options);
+    if (options.script) {
+      this.scriptService.generateScript(taskNames);
+    } else {
+      this.taskRunner.runTasks(taskNames, options);
+    }
   }
 
   private chdir(cwd: string) {

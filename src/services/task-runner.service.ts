@@ -1,14 +1,12 @@
-/// <reference path="../types/dependency-graph.d.ts" />
-
 import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
-import { DepGraph } from 'dependency-graph';
 import * as path from 'path';
 
 import { Project } from './../helpers/project';
 import { RunOptions } from './../helpers/run-options';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
+import { DependencyGraphService } from './dependency-graph.service';
 import { LogService } from './log.service';
 import { ProjectService } from './project.service';
 import { ExecResult, ShellService } from './shell.service';
@@ -18,6 +16,7 @@ import { currentVersion } from './version.service';
 export class TaskRunnerService {
   constructor(
     private console: ConsoleService,
+    private dependencyGraphService: DependencyGraphService,
     private logService: LogService,
     private projectService: ProjectService,
     private shell: ShellService) {
@@ -90,7 +89,7 @@ export class TaskRunnerService {
     return Promise.resolve(allProjects)
       .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
       .then(projects => projectNames === undefined ? projects : projects.filter(project => projectNames.some(n => project.name === n)))
-      .then(projects => this.orderProjectsByDependencyGraph(taskName, projects))
+      .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))
       .then(projects => {
         const runningTasks: RunningTask[] = projects
           .map(project => ({ project, taskName, status: TaskStatus.Waiting }));
@@ -140,10 +139,9 @@ export class TaskRunnerService {
   private startTask(runningTask: RunningTask, options: RunOptions): Promise<ExecResult> {
     runningTask.status = TaskStatus.InProcess;
 
-    let task = runningTask.project.tasks[runningTask.taskName];
+    const task = runningTask.project.tasks[runningTask.taskName];
 
-    task = Array.isArray(task) ? task : [task];
-    const commands = task
+    const commands = (Array.isArray(task) ? task : [task])
       .map(command => typeof command === 'string' ? { command } : command);
 
     let runCommands = Promise.resolve(undefined);
@@ -172,50 +170,6 @@ export class TaskRunnerService {
     }
 
     return runCommands;
-  }
-
-  private orderProjectsByDependencyGraph(taskName: string, projects: Project[]): Project[] {
-    const dependencyGraph = new DepGraph<Project>();
-
-    for (const project of projects) {
-      dependencyGraph.addNode(project.name, project);
-    }
-
-    for (const dependant of projects) {
-      if (dependant.dependencies && dependant.dependencies.length) {
-        for (const depencency of dependant.dependencies) {
-          if (dependencyGraph.hasNode(depencency)) {
-            dependencyGraph.addDependency(dependant.name, depencency);
-          }
-        }
-      }
-    }
-
-    const order = dependencyGraph.overallOrder();
-
-    const orderedProjects = order
-      .map(projectName => dependencyGraph.getNodeData(projectName));
-
-    const dependencyGraphText = orderedProjects
-      .map(project => ({
-        project: project,
-        orderedDependencies: order.filter(name => project.dependencies &&  project.dependencies.indexOf(name) > -1)
-      }))
-      .map(item => `${item.project.name}: ${JSON.stringify(item.orderedDependencies)}`)
-      .join('\n');
-
-    const logInfo = `
-------------------------------------------------------------------------------------------
-Task: ${taskName}
-
-Dependency Graph:
-
-${dependencyGraphText}
-------------------------------------------------------------------------------------------`;
-
-    this.logService.log(logInfo, false);
-
-    return orderedProjects;
   }
 
   private renderProgress(runningTasks: RunningTask[]): Promise<RunningTask[]> {
