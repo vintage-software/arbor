@@ -50,10 +50,12 @@ export class TaskRunnerService {
   }
 
   runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames?: string[]) {
-    this.console.log(`Task: ${taskName}`);
+    if (options.progress) {
+      this.console.log(`Task: ${taskName}`);
+    }
 
     this.startTasks(projects, taskName, options, projectNames)
-      .then(runningTasks => this.renderProgress(runningTasks))
+      .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks, options.progress))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
         if (Array.isArray(runningTasks) === false) {
@@ -165,27 +167,37 @@ export class TaskRunnerService {
 
           return Promise.resolve(undefined)
             .then(() => { runningTask.currentCommand = command; })
-            .then(() => this.shell.execute(command.command, { cwd }, options.liveLog, runningTask));
+            .then(() => this.shell.execute(command.command, { cwd }, options.liveLog, runningTask))
+            .then(({logText}) => {
+              if (options.progress === false) {
+                this.console.log(logText);
+              }
+            });
         });
     }
 
     return runCommands;
   }
 
-  private renderProgress(runningTasks: RunningTask[]): Promise<RunningTask[]> {
+  private waitUntilTaskIsComplete(runningTasks: RunningTask[], progress: boolean): Promise<RunningTask[]> {
     return new Promise<RunningTask[]>((resolve, reject) => {
       const interval = setInterval(() => {
         const output = runningTasks
           .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
           .join('\n');
 
-        this.console.progress(output);
+        if (progress) {
+          this.console.progress(output);
+        }
 
         const completedTasks = runningTasks
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
-          this.console.finalizeProgress();
+          if (progress) {
+            this.console.finalizeProgress();
+          }
+
           clearInterval(interval);
 
           const allTasksSucceeded = runningTasks.every(runningTask => runningTask.status === TaskStatus.Success);

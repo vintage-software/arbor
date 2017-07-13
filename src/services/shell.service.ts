@@ -11,6 +11,7 @@ export interface ExecResult {
   error: any;
   stdout: string;
   stderr: string;
+  logText?: string;
 }
 
 export interface RunningProcess {
@@ -59,9 +60,9 @@ export class ShellService {
           this.writeLiveLog(liveLog);
 
           if (isError) {
-            reject(result);
+            reject({ ...result, logText });
           } else {
-            resolve(result);
+            resolve({ ...result, logText });
           }
 
           done = true;
