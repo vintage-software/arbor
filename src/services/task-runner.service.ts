@@ -188,7 +188,7 @@ export class TaskRunnerService {
           .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
           .join('\n');
 
-        if (options.liveLogConsole === false) {
+        if (options.liveLogConsole !== true) {
           this.console.progress(output);
         }
 
@@ -196,7 +196,7 @@ export class TaskRunnerService {
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
-          if (options.liveLogConsole === false) {
+          if (options.liveLogConsole !== true) {
             this.console.finalizeProgress();
           }
 
