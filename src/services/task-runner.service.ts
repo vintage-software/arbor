@@ -23,13 +23,13 @@ export class TaskRunnerService {
   }
 
   runTasks(taskNames: string[], options: RunOptions) {
-    this.console.log(`Arbor v${currentVersion}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+    this.log(`Arbor v${currentVersion}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`, options.liveLogConsole);
 
-    if (options.liveLog) {
-      this.console.log('Live log is enabled.');
+    if (options.liveLogFile) {
+      this.log('Live log is enabled.', options.liveLogConsole);
     }
 
-    this.console.log();
+    this.log('', options.liveLogConsole);
 
     this.logService.deleteLogs();
 
@@ -50,12 +50,10 @@ export class TaskRunnerService {
   }
 
   runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames?: string[]) {
-    if (options.progress) {
-      this.console.log(`Task: ${taskName}`);
-    }
+    this.log(`Task: ${taskName}`, options.liveLogConsole);
 
     this.startTasks(projects, taskName, options, projectNames)
-      .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks, options.progress))
+      .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks, options))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
         if (Array.isArray(runningTasks) === false) {
@@ -64,22 +62,26 @@ export class TaskRunnerService {
           process.exit(1);
         }
 
-        this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
-          .then(response => {
-            if (response === 'y') {
-              console.log('');
-              this.runTask(projects, taskName, options, next);
-            } else if (response === 'f') {
-              const failedProjectNames = runningTasks
-                .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
-                .map(runningTask => runningTask.project.name);
+        if (options.liveLogConsole) {
+          process.exit(1);
+        } else {
+          this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
+            .then(response => {
+              if (response === 'y') {
+                console.log('');
+                this.runTask(projects, taskName, options, next);
+              } else if (response === 'f') {
+                const failedProjectNames = runningTasks
+                  .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
+                  .map(runningTask => runningTask.project.name);
 
-              console.log('');
-              this.runTask(projects, taskName, options, next, failedProjectNames);
-            } else {
-              process.exit(1);
-            }
-          });
+                console.log('');
+                this.runTask(projects, taskName, options, next, failedProjectNames);
+              } else {
+                process.exit(1);
+              }
+            });
+        }
       });
   }
 
@@ -124,6 +126,11 @@ export class TaskRunnerService {
                 })
                 .catch(() => {
                   runningTask.status = TaskStatus.Failed;
+
+                  if (options.liveLogConsole) {
+                    process.exit(1);
+                  }
+
                   next();
                 });
             } else if (anyDepenendenciesFailed || anyDepenendenciesBlocked) {
@@ -167,26 +174,21 @@ export class TaskRunnerService {
 
           return Promise.resolve(undefined)
             .then(() => { runningTask.currentCommand = command; })
-            .then(() => this.shell.execute(command.command, { cwd }, options.liveLog, runningTask))
-            .then(({logText}) => {
-              if (options.progress === false) {
-                this.console.log(logText);
-              }
-            });
+            .then(() => this.shell.execute(command.command, { cwd }, options.liveLogConsole, options.liveLogFile, runningTask));
         });
     }
 
     return runCommands;
   }
 
-  private waitUntilTaskIsComplete(runningTasks: RunningTask[], progress: boolean): Promise<RunningTask[]> {
+  private waitUntilTaskIsComplete(runningTasks: RunningTask[], options: RunOptions): Promise<RunningTask[]> {
     return new Promise<RunningTask[]>((resolve, reject) => {
       const interval = setInterval(() => {
         const output = runningTasks
           .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
           .join('\n');
 
-        if (progress) {
+        if (options.liveLogConsole === false) {
           this.console.progress(output);
         }
 
@@ -194,7 +196,7 @@ export class TaskRunnerService {
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
-          if (progress) {
+          if (options.liveLogConsole === false) {
             this.console.finalizeProgress();
           }
 
@@ -256,5 +258,13 @@ export class TaskRunnerService {
     }
 
     return status;
+  }
+
+  private log(message: string, liveLogConsole: boolean) {
+    if (liveLogConsole) {
+      console.log(message);
+    } else {
+      this.console.log(message);
+    }
   }
 }

@@ -1,7 +1,7 @@
 export interface RunOptions {
   cwd: string;
-  liveLog: boolean;
-  progress: boolean;
+  liveLogFile: boolean;
+  liveLogConsole: boolean;
 }
 
 export interface ScriptOptions {

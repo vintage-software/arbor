@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import * as chalk from 'chalk';
 import { spawn, SpawnOptions } from 'child_process';
 import * as path from 'path';
 
@@ -11,7 +12,6 @@ export interface ExecResult {
   error: any;
   stdout: string;
   stderr: string;
-  logText?: string;
 }
 
 export interface RunningProcess {
@@ -26,7 +26,7 @@ export class ShellService {
   constructor(private logService: LogService) {
   }
 
-  execute(command: string, options?: SpawnOptions, liveLog = false, runningTask?: RunningTask): Promise<ExecResult> {
+  execute(command: string, options?: SpawnOptions, liveLogConsole = false, liveLogFile = false, runningTask?: RunningTask): Promise<ExecResult> {
     const cwd = options.cwd || process.cwd();
 
     const commandAndArgs = process.platform === 'win32' ?
@@ -38,10 +38,10 @@ export class ShellService {
       const spawnedProcess = spawn(commandAndArgs.command, commandAndArgs.args, options);
 
       this.runningProcesses[spawnedProcess.pid] = runningProcess;
-      this.writeLiveLog(liveLog);
+      this.writeLiveLogFile(liveLogFile);
 
-      spawnedProcess.stdout.on('data', data => { this.processData(result, liveLog, runningTask, data, false); });
-      spawnedProcess.stderr.on('data', data => { this.processData(result, liveLog, runningTask, data, true); });
+      spawnedProcess.stdout.on('data', data => { this.processData(result, liveLogConsole, liveLogFile, runningTask, data, false); });
+      spawnedProcess.stderr.on('data', data => { this.processData(result, liveLogConsole, liveLogFile, runningTask, data, true); });
 
       let done = false;
       const handleResult = (error: Error, code?: number, signal?: string) => {
@@ -57,12 +57,12 @@ export class ShellService {
           this.logService.log(logText, isError);
 
           this.runningProcesses[spawnedProcess.pid] = undefined;
-          this.writeLiveLog(liveLog);
+          this.writeLiveLogFile(liveLogFile);
 
           if (isError) {
-            reject({ ...result, logText });
+            reject(result);
           } else {
-            resolve({ ...result, logText });
+            resolve(result);
           }
 
           done = true;
@@ -74,7 +74,7 @@ export class ShellService {
     });
   }
 
-  private processData(result: ExecResult, liveLog: boolean, runningTask: RunningTask, data: string | Buffer, error: boolean) {
+  private processData(result: ExecResult, liveLogConsole: boolean, liveLogFile: boolean, runningTask: RunningTask, data: string | Buffer, error: boolean) {
     const commandInfo = `${result.cwd}> ${result.command}`;
     const output = this.readData(commandInfo, data);
 
@@ -84,7 +84,8 @@ export class ShellService {
       result.stdout += output;
     }
 
-    this.writeLiveLog(liveLog);
+    this.writeLiveLogFile(liveLogFile);
+    this.writeLiveLogConsole(liveLogConsole, output, runningTask);
 
     if (runningTask) {
       this.updateProgressLogLine(runningTask, result);
@@ -120,7 +121,7 @@ export class ShellService {
       (lastLine ? lastLine.trim() : undefined);
   }
 
-  private writeLiveLog(enabled: boolean) {
+  private writeLiveLogFile(enabled: boolean) {
     if (enabled) {
       const liveLogText = Object.keys(this.runningProcesses)
         .map(pid => this.runningProcesses[parseInt(pid, 10)])
@@ -129,6 +130,17 @@ export class ShellService {
         .join('\n');
 
       this.logService.liveLog(liveLogText);
+    }
+  }
+
+  private writeLiveLogConsole(enabled: boolean, output: string, runningTask: RunningTask) {
+    if (enabled) {
+      const liveLogText = output
+        .split('\n')
+        .map(line => `${chalk.gray(`[${runningTask.project.name}:${runningTask.taskName}]`)} ${line}`)
+        .join('\n');
+
+      console.log(liveLogText);
     }
   }
 
