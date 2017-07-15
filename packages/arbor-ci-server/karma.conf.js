@@ -7,7 +7,7 @@ module.exports = function (config) {
     frameworks: ['jasmine', '@angular/cli'],
     plugins: [
       require('karma-jasmine'),
-      require('karma-chrome-launcher'),
+      require(process.env.TRAVIS ? 'karma-firefox-launcher' : 'karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage-istanbul-reporter'),
       require('@angular/cli/plugins/karma')
@@ -22,18 +22,13 @@ module.exports = function (config) {
     angularCli: {
       environment: 'dev'
     },
-    customLaunchers: {
-      Chrome_TravisCI: {
-        base: 'Chrome',
-        flags: ['--no-sandbox']
-      }
-    },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: process.env.TRAVIS ? ['Chrome_TravisCI'] : ['Chrome'],
+    browserNoActivityTimeout: 30000,
+    browsers: process.env.TRAVIS ? ['Firefox'] : ['Chrome'],
     singleRun: false
   });
 };
