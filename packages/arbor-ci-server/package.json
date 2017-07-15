@@ -25,10 +25,6 @@
     "build--prod:client": "ng build --prod --no-sourcemap --stats-json",
     "build--prod:server": "webpack --config ./build/webpack.server.prod.ts --progress --bail"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vintage-software/arbor.git"
-  },
   "keywords": [
     "Build",
     "Tool",
@@ -41,6 +37,10 @@
     "Kevin Phelps <kphelps@vintagesoftware.com>"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vintage-software/arbor.git"
+  },
   "bugs": {
     "url": "https://github.com/vintage-software/arbor/issues"
   },

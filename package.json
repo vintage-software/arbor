@@ -11,16 +11,16 @@
     "watch:arbor": "cd ./packages/arbor && npm run watch",
     "watch:arbor-ci-server": "cd ./packages/arbor-ci-server && npm run watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vintage-software/arbor.git"
-  },
   "author": "Vintage Software <dev@vintagesoftware.com>",
   "contributors": [
     "Cory Rylan <crylan@vintagesoftware.com>",
     "Kevin Phelps <kphelps@vintagesoftware.com>"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vintage-software/arbor.git"
+  },
   "bugs": {
     "url": "https://github.com/vintage-software/arbor/issues"
   },

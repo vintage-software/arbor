@@ -18,10 +18,6 @@
     "patch-release": "npm run build && npm version patch && npm publish && git push --follow-tags",
     "minor-release": "npm run build && npm version minor && npm publish && git push --follow-tags"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vintage-software/arbor.git"
-  },
   "keywords": [
     "Build",
     "Tool",
@@ -33,6 +29,14 @@
     "Cory Rylan <crylan@vintagesoftware.com>",
     "Kevin Phelps <kphelps@vintagesoftware.com>"
   ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vintage-software/arbor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vintage-software/arbor/issues"
+  },
   "homepage": "https://github.com/vintage-software/arbor#readme",
   "dependencies": {
     "@angular/animations": "4.3.0",
