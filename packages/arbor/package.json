@@ -1,0 +1,61 @@
+{
+  "name": "arbor",
+  "version": "0.7.1",
+  "description": "A simple CLI tool to build projects across several platforms in parallel",
+  "main": "dist/index.js",
+  "bin": {
+    "arbor": "dist/index.js"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist",
+    "lint": "tslint --project tsconfig.json --type-check",
+    "prebuild": "run-s clean lint",
+    "postbuild": "echo successfully built",
+    "build": "tsc --project tsconfig.json",
+    "watch": "tsc --project tsconfig.json --watch",
+    "patch-release": "npm run build && npm version patch && npm publish && git push --follow-tags",
+    "minor-release": "npm run build && npm version minor && npm publish && git push --follow-tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vintage-software/arbor.git"
+  },
+  "keywords": [
+    "Build",
+    "Tool",
+    "Build",
+    "CLI"
+  ],
+  "author": "Vintage Software <dev@vintagesoftware.com>",
+  "contributors": [
+    "Cory Rylan <crylan@vintagesoftware.com>",
+    "Kevin Phelps <kphelps@vintagesoftware.com>"
+  ],
+  "homepage": "https://github.com/vintage-software/arbor#readme",
+  "dependencies": {
+    "@angular/animations": "4.3.0",
+    "@angular/common": "4.3.0",
+    "@angular/compiler": "4.3.0",
+    "@angular/core": "4.3.0",
+    "@angular/http": "4.3.0",
+    "@angular/platform-browser": "4.3.0",
+    "@angular/platform-server": "4.3.0",
+    "chalk": "2.0.1",
+    "commander": "2.11.0",
+    "dependency-graph": "0.5.0",
+    "reflect-metadata": "0.1.10",
+    "rxjs": "5.4.2",
+    "zone.js": "0.8.13"
+  },
+  "devDependencies": {
+    "@types/chalk": "0.4.31",
+    "@types/commander": "2.9.1",
+    "@types/node": "8.0.13",
+    "npm-run-all": "4.0.2",
+    "rimraf": "2.6.1",
+    "tslint": "5.5.0",
+    "typescript": "2.4.1"
+  }
+}

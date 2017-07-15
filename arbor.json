@@ -1,15 +1,30 @@
-{
-  "name": "arbor",
-  "tasks": {
-    "install": "npm install",
-    "lint": "npm run lint",
-    "test": "npm run test",
-    "build": "npm run build",
-    "build--prod": "npm run build--prod",
-    "deploy": "npm run build--prod && npm publish"
+[
+  {
+    "name": "root",
+    "tasks": {
+      "install": "yarn --pure-lockfile --mutex network"
+    },
+    "dependencies": []
   },
-  "external": [
-    "https://www.npmjs.com/"
-  ],
-  "dependencies": []
-}
+  {
+    "name": "arbor",
+    "cwd": "./packages/arbor",
+    "tasks": {
+      "install": "yarn --pure-lockfile --mutex network",
+      "build": "npm run build",
+      "build--prod": "npm run build"
+    },
+    "dependencies": []
+  },
+  {
+    "name": "arbor-ci-server",
+    "cwd": "./packages/arbor-ci-server",
+    "tasks": {
+      "install": "yarn --pure-lockfile --mutex network",
+      "test": "npm run test",
+      "build": "npm run build",
+      "build--prod": "npm run build--prod"
+    },
+    "dependencies": []
+  }
+]
