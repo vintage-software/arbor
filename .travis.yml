@@ -1,9 +1,18 @@
 language: node_js
 node_js:
 - 8.1.4
+before_install:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
 script:
-- npm install -g arbor
-- arbor run install build--prod --live-log-console
+- cd ./../packages/arbor
+- yarn --pure-lockfile
+- yarn run build
+- cd ./../../
+- cd ./packages/arbor
+- yarn --pure-lockfile
+- yarn run build--prod
 notifications:
   slack:
     secure: AzHdqjlOCWEKWfRTABBP+z9TUssM4FgXU1inPXw2BHwidBYE4pW5dQFjs/AvnyZJBKp3xTXGl2ai2/Q9L9N5Msc9ecT3MJ6ISOZt9jxljJ6wp+zM93x/pzogO+e656+zaId1ktDwl75Z2ZdfyahmU8ElqeuIuuWkzFzZUIQwU5OWgN/EaheGR+TLjWjO+xRUN/3EFw3nFN28cfiiHkws06WgwE3dmWv/0DBa42khUNJXnEfKPPjAh5TGtOwEe+2nygmMCE8bILKOrsS8Qth3Nef9xTRB8zyHLWnVAHGes1+cbPG8/rFQjWqU+jhRMiMsdpIiWJgI5uT4sxv1qp6qL8JG3Qq6QlGOiGgXYbIEanYKXnbFy+5fJpDpN0+2wqmAb2wUFBb87lNpifgPdXKtldRM3aKB0B4ylWcmUIhYb6njnsFMwROnGNB6vEChG6l1/CWWiI5KLfyAITcEKUoI/dnNcqtjQdqhYYNa5rr+DFcxU4ih+ro4l2xzevR0RIgt67p1DKk7khmpTyqtfMzAcUEKy74ALWIjwXeFobqPEb54B7ZxVZ4eFLlsi6oQ/1p4FRA59p/ZX0bSgBCHaPQ8vLg40dV2O9fzmb731x4pINlEkSkwdd8qrzo/YdoYacfQ4rF+7LkNOk6cF8yTidsesxg8nTg+XMKsEHCJnRDga0Q=

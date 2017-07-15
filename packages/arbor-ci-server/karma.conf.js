@@ -22,12 +22,18 @@ module.exports = function (config) {
     angularCli: {
       environment: 'dev'
     },
+    customLaunchers: {
+      Chrome_TravisCI: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
+    browsers: process.env.TRAVIS ? ['Chrome_TravisCI'] : ['Chrome'],
     singleRun: false
   });
 };
