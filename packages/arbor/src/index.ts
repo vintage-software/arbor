@@ -2,13 +2,12 @@
 
 import 'reflect-metadata';
 
-import { AppModule } from './app.module';
+import { ReflectiveInjector } from '@angular/core';
+
+import { providers } from './providers';
 import { ProgramService } from './services/program.service';
-import { getInjector } from './utilities/get-injector';
 
-(async function () {
-  const injector = await getInjector(AppModule);
-  const program: ProgramService = injector.get(ProgramService);
+const injector = ReflectiveInjector.resolveAndCreate(providers);
+const program: ProgramService = injector.get(ProgramService);
 
-  program.start();
-})();
+program.start();

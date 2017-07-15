@@ -2,21 +2,9 @@
 # yarn lockfile v1
 
 
-"@angular/animations@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@angular/animations/-/animations-4.3.0.tgz#56f34b84649379202ac359929b82eb0b915e9c72"
-  dependencies:
-    tslib "^1.7.1"
-
 "@angular/common@4.3.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@angular/common/-/common-4.3.0.tgz#13a54a6929dd52f9729b16ae446fad58fe163053"
-  dependencies:
-    tslib "^1.7.1"
-
-"@angular/compiler@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@angular/compiler/-/compiler-4.3.0.tgz#55503bf27a1f062f71b9495393f3311903a8fc43"
   dependencies:
     tslib "^1.7.1"
 
@@ -25,26 +13,6 @@
   resolved "https://registry.yarnpkg.com/@angular/core/-/core-4.3.0.tgz#bd2249c3de1224a7c6536c4aba728d6565329334"
   dependencies:
     tslib "^1.7.1"
-
-"@angular/http@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@angular/http/-/http-4.3.0.tgz#dfb73310a840a6ad8050ac51f0e55c4984db0926"
-  dependencies:
-    tslib "^1.7.1"
-
-"@angular/platform-browser@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@angular/platform-browser/-/platform-browser-4.3.0.tgz#02389489185185c3becf06359346100e5479c7e1"
-  dependencies:
-    tslib "^1.7.1"
-
-"@angular/platform-server@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@angular/platform-server/-/platform-server-4.3.0.tgz#5387fc848d0a75657c5ed9b70e1a57f054fb270f"
-  dependencies:
-    parse5 "^3.0.1"
-    tslib "^1.7.1"
-    xhr2 "^0.1.4"
 
 "@types/chalk@0.4.31":
   version "0.4.31"
@@ -59,10 +27,6 @@
 "@types/node@*", "@types/node@8.0.13":
   version "8.0.13"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.13.tgz#530f0f9254209b0335bf5cc6387822594ef47093"
-
-"@types/node@^6.0.46":
-  version "6.0.83"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.83.tgz#dd022db01ac2c01c1057775e88ccffce96d1d6fe"
 
 ansi-regex@^2.0.0:
   version "2.1.1"
@@ -388,12 +352,6 @@ parse-json@^2.2.0:
   dependencies:
     error-ex "^1.2.0"
 
-parse5@^3.0.1:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/parse5/-/parse5-3.0.2.tgz#05eff57f0ef4577fb144a79f8b9a967a6cc44510"
-  dependencies:
-    "@types/node" "^6.0.46"
-
 path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
@@ -588,10 +546,6 @@ which@^1.2.9:
 wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
-
-xhr2@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/xhr2/-/xhr2-0.1.4.tgz#7f87658847716db5026323812f818cadab387a5f"
 
 yallist@^2.1.2:
   version "2.1.2"
