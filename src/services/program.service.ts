@@ -36,6 +36,7 @@ export class ProgramService {
       .command('run <tasks...>')
       .description('Run a given list of Arbor tasks in the current working directory.')
       .option('--cwd <cwd>', 'Override the current working directory.')
+      .option('--port <port>', 'POST progress updates to Arbor CI Server.')
       .option('--live-log-file', 'Logs process output to arbor-live.log as it is captured.')
       .option('--live-log-console', 'Logs process output to the console as it is captured.')
       .action((taskNames: string[], options: RunOptions) => this.run(taskNames, options));
@@ -51,6 +52,8 @@ export class ProgramService {
     if (options.cwd && options.cwd.length) {
       this.chdir(options.cwd);
     }
+
+    options.port = +options.port;
 
     this.taskRunner.runTasks(taskNames, options);
   }

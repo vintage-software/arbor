@@ -1,5 +1,6 @@
 export interface RunOptions {
   cwd: string;
+  port: number;
   liveLogFile: boolean;
   liveLogConsole: boolean;
 }
