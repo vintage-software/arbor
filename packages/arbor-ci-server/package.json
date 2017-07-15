@@ -20,7 +20,6 @@
     "build:client": "ng build",
     "build:server": "webpack --config ./build/webpack.server.dev.ts --progress",
     "prebuild--prod": "run-s -n prebuild",
-    "postbuild--prod": "run-s -n test",
     "build--prod": "run-s -n build--prod:*",
     "build--prod:client": "ng build --prod --no-sourcemap --stats-json",
     "build--prod:server": "webpack --config ./build/webpack.server.prod.ts --progress --bail"
