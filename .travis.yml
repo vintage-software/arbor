@@ -2,6 +2,7 @@ language: node_js
 node_js:
 - 8.1.4
 script:
+- npm install -g arbor
 - arbor run install build--prod --live-log-console
 notifications:
   slack:
