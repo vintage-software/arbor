@@ -10,7 +10,7 @@ script:
 - yarn --pure-lockfile
 - yarn run build
 - cd ./../../
-- cd ./packages/arbor
+- cd ./packages/arbor-ci-server
 - yarn --pure-lockfile
 - yarn run build--prod
 notifications:
