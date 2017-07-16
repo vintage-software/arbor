@@ -38,25 +38,31 @@ export class TaskRunnerService {
       this.projectService.getProjects()
         .then(projects => {
           const next = () => {
+            let taskPromise = Promise.resolve(void 0);
+
             taskNames.shift();
 
             if (taskNames.length) {
-              this.runTask(projects, taskNames[0], options, next);
+              taskPromise = this.runTask(projects, taskNames[0], options, next);
             }
+
+            return taskPromise;
           };
 
-          this.runTask(projects, taskNames[0], options, next);
+          return this.runTask(projects, taskNames[0], options, next);
         });
     }
   }
 
-  runTask(projects: Project[], taskName: string, options: RunOptions, next: () => void, projectNames?: string[]) {
+  runTask(projects: Project[], taskName: string, options: RunOptions, next: () => Promise<void>, projectNames?: string[]) {
     this.log(`Task: ${taskName}`, options.liveLogConsole);
 
-    this.startTasks(projects, taskName, options, projectNames)
+    return this.startTasks(projects, taskName, options, projectNames)
       .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks, options))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
+        let retryPromise = Promise.resolve({ runningTasks, response: undefined as string });
+
         if (Array.isArray(runningTasks) === false) {
           // `runningTasks` is actually an unhandled error.
           console.log(runningTasks.toString());
@@ -66,22 +72,34 @@ export class TaskRunnerService {
         if (options.liveLogConsole) {
           process.exit(1);
         } else {
-          this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
-            .then(response => {
-              if (response === 'y') {
-                console.log('');
-                this.runTask(projects, taskName, options, next);
-              } else if (response === 'f') {
-                const failedProjectNames = runningTasks
-                  .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
-                  .map(runningTask => runningTask.project.name);
+          retryPromise = this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
+            .then(response => ({ runningTasks, response }));
+        }
 
-                console.log('');
-                this.runTask(projects, taskName, options, next, failedProjectNames);
-              } else {
-                process.exit(1);
-              }
-            });
+        return retryPromise;
+      })
+      .then(retry => {
+        if (retry) {
+          const response = retry.response;
+          const runningTasks = retry.runningTasks;
+
+          let taskPromise = Promise.resolve(void 0);
+
+          if (response === 'y') {
+            console.log('');
+            taskPromise = this.runTask(projects, taskName, options, next);
+          } else if (response === 'f') {
+            const failedProjectNames = runningTasks
+              .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
+              .map(runningTask => runningTask.project.name);
+
+            console.log('');
+            taskPromise = this.runTask(projects, taskName, options, next, failedProjectNames);
+          } else {
+            process.exit(1);
+          }
+
+          return taskPromise;
         }
       });
   }
