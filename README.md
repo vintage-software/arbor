@@ -4,7 +4,7 @@
 
 A CLI tool to build projects across several platforms in parallel.
 
-<img src="https://rawgit.com/vintage-software/arbor/master/packages/arbor-ci-server/src/assets/images/logo.svg" alt="Arbor" width="200" />
+<img src="https://raw.githubusercontent.com/vintage-software/arbor/master/src/web/assets/images/logo.svg" alt="Arbor" width="200" />
 
 Run `npm install -g arbor` to install. Create a `arbor.json` file with specified tasks.
 Run `arbor run build` command, this will run the build task of all project recursively in the directory.
