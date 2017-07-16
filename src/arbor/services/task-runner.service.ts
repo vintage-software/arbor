@@ -25,6 +25,7 @@ export class TaskRunnerService {
 
   runTasks(taskNames: string[], options: RunOptions) {
     this.console.log(`Arbor v${environment.version}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+    this.console.log();
 
     this.logService.deleteLogs();
 
