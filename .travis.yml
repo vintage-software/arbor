@@ -5,12 +5,6 @@ before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 script:
-- cd ./packages/arbor
-- yarn --pure-lockfile
-- yarn run build
-- cd ./../../
-- cd ./packages/arbor-ci-server
-- yarn --pure-lockfile
 - yarn run build--prod
 notifications:
   slack:
