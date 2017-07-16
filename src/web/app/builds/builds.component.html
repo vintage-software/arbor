@@ -1,0 +1,4 @@
+<button md-raised-button (click)="queueBuild()">Queue Build</button> | There are {{ queuedBuildCount | async }} builds in the queue.
+<hr />
+
+<app-builds-table title="In Progress Builds" [builds]="inProgressBuilds | async"></app-builds-table>

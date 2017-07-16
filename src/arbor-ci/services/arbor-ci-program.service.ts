@@ -3,10 +3,14 @@ import * as program from 'commander';
 
 import { environment } from './../../common/environments/environment';
 import { VersionService } from './../../common/services/version.service';
+import { DeployServerCommand } from './../commands/deploy-server.command';
+import { RunAgentCommand } from './../commands/run-agent.command';
 
 @Injectable()
 export class ArborCiProgramService {
   constructor(
+    private deployServerCommand: DeployServerCommand,
+    private runAgentCommand: RunAgentCommand,
     private versionService: VersionService
   ) { }
 
@@ -20,6 +24,16 @@ export class ArborCiProgramService {
 
   private registerCommands() {
     program.version(environment.version);
+
+    program
+      .command('deploy-server')
+      .description('Deploy the Arbor CI website to Firebase.')
+      .action(() => { this.deployServerCommand.run(); });
+
+    program
+      .command('run-agent')
+      .description('Runs the Arbor CI build agent.')
+      .action(() => { this.runAgentCommand.run(); });
   }
 
   private mapVersionFlag() {

@@ -13,5 +13,16 @@
     "CI"
   ],
   "dependencies": {
+    "@angular/common": "",
+    "@angular/core": "",
+    "chalk": "",
+    "commander": "",
+    "dependency-graph": "",
+    "firebase-admin": "",
+    "fs-extra": "",
+    "reflect-metadata": "",
+    "rimraf": "",
+    "rxjs": "",
+    "zone.js": ""
   }
 }

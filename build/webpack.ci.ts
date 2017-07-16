@@ -13,7 +13,8 @@ export default {
     webpackNodeExternals()
   ],
   entry: {
-    'index': './src/arbor-ci/index.ts'
+    'index': './src/arbor-ci/index.ts',
+    'arbor': './src/arbor/index.ts'
   },
   output: {
     path: path.resolve('./dist/arbor-ci'),

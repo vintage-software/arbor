@@ -21,9 +21,9 @@ export const providers = [
   ProgressService,
   ProjectService,
   RunCommand,
+  ScriptCommand,
   ScriptService,
   ShellService,
-  ScriptCommand,
   TaskRunnerService,
   VersionService
 ];

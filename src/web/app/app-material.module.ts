@@ -1,8 +1,11 @@
+import { CdkTableModule } from '@angular/cdk';
 import { NgModule } from '@angular/core';
-import { MdButtonModule, MdToolbarModule } from '@angular/material';
+import { MdButtonModule, MdTableModule, MdToolbarModule } from '@angular/material';
 
 const modules = [
+  CdkTableModule,
   MdButtonModule,
+  MdTableModule,
   MdToolbarModule
 ];
 

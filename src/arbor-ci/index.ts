@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+import './../common/rxjs-operators';
+
 import { ReflectiveInjector } from '@angular/core';
 
 import { providers } from './providers';

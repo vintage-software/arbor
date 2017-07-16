@@ -1,6 +1,18 @@
-<md-toolbar color="accent">
-  <img class="logo" src="/assets/images/logo.svg" />
-  <span>Arbor CI Server</span>
-</md-toolbar>
+<header>
+  <md-toolbar color="accent">
+    <img class="logo" src="/assets/images/logo.svg" />
+    <a routerLink="/">Arbor CI Server</a>
+    <span class="fill"></span>
+    <span *ngIf="user | async; let user">
+      {{ user.displayName }}
+      <button md-raised-button  (click)="logout()">Logout</button>
+    </span>
+    <span *ngIf="!(user | async)">
+      <button md-raised-button (click)="login()">Login</button>
+    </span>
+  </md-toolbar>
+</header>
 
-<router-outlet></router-outlet>
+<main>
+  <router-outlet></router-outlet>
+</main>

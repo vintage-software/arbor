@@ -41,6 +41,8 @@ export class ConsoleService {
   }
 
   private update() {
-    console.log(`\x1Bc${this.consoleContents}\n${this.currentProgress}`.trim());
+    if (process.send === undefined) {
+      console.log(`\x1Bc${this.consoleContents}\n${this.currentProgress}`.trim());
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { spawn, SpawnOptions } from 'child_process';
+import { fork, spawn, ForkOptions, SpawnOptions } from 'child_process';
 
 export interface ExecResult {
   cwd: string;
@@ -7,6 +7,12 @@ export interface ExecResult {
   error: any;
   stdout: string;
   stderr: string;
+}
+
+export interface ForkResult {
+  cwd: string;
+  modulePath: string;
+  error: any;
 }
 
 @Injectable()
@@ -47,6 +53,43 @@ export class ShellService {
 
       spawnedProcess.on('error', (error: Error) => { handleResult(error); });
       spawnedProcess.on('exit', (code, signal) => { handleResult(undefined, code, signal); });
+    });
+  }
+
+  fork(modulePath: string, args: string[], options?: ForkOptions, messageCallback?: (message: any) => void): Promise<ForkResult> {
+    const cwd = options.cwd || process.cwd();
+
+    return new Promise<ForkResult>((resolve, reject) => {
+      const result: ForkResult = { cwd, modulePath, error: undefined };
+      const forkedProcess = fork(modulePath, args, { ...options });
+
+      forkedProcess.on('message', message => {
+        if (messageCallback) {
+          messageCallback(message);
+        }
+      });
+
+      let done = false;
+      const handleResult = (error: Error, code?: number, signal?: string) => {
+        if (done === false) {
+          result.error = error;
+
+          if (code !== 0) {
+            result.error = Object.assign({} , result.error || {}, { code, signal });
+          }
+
+          if (result.error !== undefined) {
+            reject(result);
+          } else {
+            resolve(result);
+          }
+
+          done = true;
+        }
+      };
+
+      forkedProcess.on('error', (error: Error) => { handleResult(error); });
+      forkedProcess.on('exit', (code, signal) => { handleResult(undefined, code, signal); });
     });
   }
 

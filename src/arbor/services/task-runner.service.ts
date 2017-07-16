@@ -62,8 +62,14 @@ export class TaskRunnerService {
           process.exit(1);
         }
 
-        return this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
-          .then(response => ({ runningTasks, response }));
+        let retryPromise = Promise.resolve({ runningTasks, response: '' });
+
+        if (process.send === undefined) {
+          retryPromise = this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
+            .then(response => ({ runningTasks, response }));
+        }
+
+        return retryPromise;
       })
       .then(retry => {
         if (retry) {
@@ -82,7 +88,7 @@ export class TaskRunnerService {
 
             console.log('');
             taskPromise = this.runTask(projects, taskName, options, next, failedProjectNames);
-          } else {
+          } else if (process.send === undefined) {
             process.exit(1);
           }
 

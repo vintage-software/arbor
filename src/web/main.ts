@@ -1,3 +1,5 @@
+import 'hammerjs';
+
 import './../common/rxjs-operators';
 
 import { enableProdMode } from '@angular/core';
