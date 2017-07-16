@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import * as chalk from 'chalk';
 import * as path from 'path';
 
 import { RunOptions } from './../helpers/options';
@@ -8,6 +7,7 @@ import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
 import { DependencyGraphService } from './dependency-graph.service';
 import { LogService } from './log.service';
+import { ProgressService } from './progress.service';
 import { ProjectService } from './project.service';
 import { ExecResult, ShellService } from './shell.service';
 import { currentVersion } from './version.service';
@@ -18,6 +18,7 @@ export class TaskRunnerService {
     private console: ConsoleService,
     private dependencyGraphService: DependencyGraphService,
     private logService: LogService,
+    private progressService: ProgressService,
     private projectService: ProjectService,
     private shell: ShellService) {
   }
@@ -184,21 +185,13 @@ export class TaskRunnerService {
   private waitUntilTaskIsComplete(runningTasks: RunningTask[], options: RunOptions): Promise<RunningTask[]> {
     return new Promise<RunningTask[]>((resolve, reject) => {
       const interval = setInterval(() => {
-        const output = runningTasks
-          .map(runningTask => `  ${runningTask.project.name}: ${this.getStatusText(runningTask)}`)
-          .join('\n');
-
-        if (options.liveLogConsole !== true) {
-          this.console.progress(output);
-        }
+        this.progressService.updateRunningTasks(runningTasks, options);
 
         const completedTasks = runningTasks
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
-          if (options.liveLogConsole !== true) {
-            this.console.finalizeProgress();
-          }
+          this.progressService.finalizeRunningTasks(options);
 
           clearInterval(interval);
 
@@ -212,52 +205,6 @@ export class TaskRunnerService {
         }
       }, 100);
     });
-  }
-
-  private getStatusText(runningTask: RunningTask) {
-    const defaultStatus = this.getDefaultStatusText(runningTask.taskName);
-
-    let statusText;
-
-    switch (runningTask.status) {
-      case TaskStatus.Waiting:
-        statusText = chalk.gray('waiting...');
-        break;
-      case TaskStatus.Success:
-        statusText = chalk.green('done!');
-        break;
-      case TaskStatus.Failed:
-        statusText = chalk.red('failed!');
-        break;
-      case TaskStatus.DependendecyFailed:
-        statusText = chalk.red('dependency failed!');
-        break;
-      case TaskStatus.InProcess:
-        const showProgress = runningTask.currentCommand.noProgress !== true;
-        const status = `${runningTask.statusText ? runningTask.statusText : defaultStatus}...`;
-        const progress = showProgress && runningTask.progressLogLine ? runningTask.progressLogLine : '';
-
-        statusText = `${chalk.yellow(status)} ${chalk.gray(progress)}`;
-        break;
-      default:
-        throw new Error(`Unkown task status '${runningTask.status}' in project '${runningTask.project.name}.'`);
-    }
-
-    return statusText;
-}
-
-  private getDefaultStatusText(taskName: string): string {
-    let status = 'processing';
-
-    if (taskName.indexOf('install') > -1) {
-      status = 'installing';
-    } else if (taskName.indexOf('build') > -1) {
-      status = 'building';
-    } else if (taskName.indexOf('test') > -1) {
-      status = 'testing';
-    }
-
-    return status;
   }
 
   private log(message: string, liveLogConsole: boolean) {
