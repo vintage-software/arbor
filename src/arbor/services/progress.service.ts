@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 
-import { RunOptions } from './../commands/run.command';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
 
@@ -9,20 +8,16 @@ import { ConsoleService } from './console.service';
 export class ProgressService {
   constructor(private console: ConsoleService) { }
 
-  updateRunningTasks(runningTasks: RunningTask[], options: RunOptions) {
-    if (options.liveLogConsole !== true) {
-      const output = runningTasks
-        .map(runningTask => `  ${runningTask.project.name}: ${ProgressService.getStatusText(runningTask)}`)
-        .join('\n');
+  updateRunningTasks(runningTasks: RunningTask[]) {
+    const output = runningTasks
+      .map(runningTask => `  ${runningTask.project.name}: ${ProgressService.getStatusText(runningTask)}`)
+      .join('\n');
 
-      this.console.progress(output);
-    }
+    this.console.progress(output);
   }
 
-  finalizeRunningTasks(options: RunOptions) {
-    if (options.liveLogConsole !== true) {
-      this.console.finalizeProgress();
-    }
+  finalizeRunningTasks() {
+    this.console.finalizeProgress();
   }
 
   private static getStatusText(runningTask: RunningTask) {

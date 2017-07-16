@@ -4,8 +4,6 @@ import { TaskRunnerService } from './../services/task-runner.service';
 
 export interface RunOptions {
   cwd: string;
-  liveLogFile: boolean;
-  liveLogConsole: boolean;
 }
 
 @Injectable()

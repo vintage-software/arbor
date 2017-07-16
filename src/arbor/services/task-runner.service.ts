@@ -24,13 +24,7 @@ export class TaskRunnerService {
   }
 
   runTasks(taskNames: string[], options: RunOptions) {
-    this.log(`Arbor v${environment.version}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`, options.liveLogConsole);
-
-    if (options.liveLogFile) {
-      this.log('Live log is enabled.', options.liveLogConsole);
-    }
-
-    this.log('', options.liveLogConsole);
+    this.console.log(`Arbor v${environment.version}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
     this.logService.deleteLogs();
 
@@ -55,28 +49,20 @@ export class TaskRunnerService {
   }
 
   runTask(projects: Project[], taskName: string, options: RunOptions, next: () => Promise<void>, projectNames?: string[]) {
-    this.log(`Task: ${taskName}`, options.liveLogConsole);
+    this.console.log(`Task: ${taskName}`);
 
-    return this.startTasks(projects, taskName, options, projectNames)
-      .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks, options))
+    return this.startTasks(projects, taskName, projectNames)
+      .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
-        let retryPromise = Promise.resolve({ runningTasks, response: undefined as string });
-
         if (Array.isArray(runningTasks) === false) {
           // `runningTasks` is actually an unhandled error.
           console.log(runningTasks.toString());
           process.exit(1);
         }
 
-        if (options.liveLogConsole) {
-          process.exit(1);
-        } else {
-          retryPromise = this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
-            .then(response => ({ runningTasks, response }));
-        }
-
-        return retryPromise;
+        return this.console.question('Task failed. Press "y" to restart all projects. Press "f" to restart failed projects. ')
+          .then(response => ({ runningTasks, response }));
       })
       .then(retry => {
         if (retry) {
@@ -107,7 +93,6 @@ export class TaskRunnerService {
   private startTasks(
     allProjects: Project[],
     taskName: string,
-    options: RunOptions,
     projectNames?: string[]): Promise<RunningTask[]> {
     return Promise.resolve(allProjects)
       .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
@@ -138,17 +123,13 @@ export class TaskRunnerService {
               dependencies.some(dependency => dependency.status === TaskStatus.DependendecyFailed);
 
             if (allDepenendenciesSucceeded) {
-              this.startTask(runningTask, options)
+              this.startTask(runningTask)
                 .then(() => {
                   runningTask.status = TaskStatus.Success;
                   next();
                 })
                 .catch(() => {
                   runningTask.status = TaskStatus.Failed;
-
-                  if (options.liveLogConsole) {
-                    process.exit(1);
-                  }
 
                   next();
                 });
@@ -164,7 +145,7 @@ export class TaskRunnerService {
       });
   }
 
-  private startTask(runningTask: RunningTask, options: RunOptions): Promise<ExecResult> {
+  private startTask(runningTask: RunningTask): Promise<ExecResult> {
     runningTask.status = TaskStatus.InProcess;
 
     const task = runningTask.project.tasks[runningTask.taskName];
@@ -193,23 +174,23 @@ export class TaskRunnerService {
 
           return Promise.resolve(undefined)
             .then(() => { runningTask.currentCommand = command; })
-            .then(() => this.shell.execute(command.command, { cwd }, options.liveLogConsole, options.liveLogFile, runningTask));
+            .then(() => this.shell.execute(command.command, { cwd }, runningTask));
         });
     }
 
     return runCommands;
   }
 
-  private waitUntilTaskIsComplete(runningTasks: RunningTask[], options: RunOptions): Promise<RunningTask[]> {
+  private waitUntilTaskIsComplete(runningTasks: RunningTask[]): Promise<RunningTask[]> {
     return new Promise<RunningTask[]>((resolve, reject) => {
       const interval = setInterval(() => {
-        this.progressService.updateRunningTasks(runningTasks, options);
+        this.progressService.updateRunningTasks(runningTasks);
 
         const completedTasks = runningTasks
           .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
 
         if (completedTasks.length === runningTasks.length) {
-          this.progressService.finalizeRunningTasks(options);
+          this.progressService.finalizeRunningTasks();
 
           clearInterval(interval);
 
@@ -223,13 +204,5 @@ export class TaskRunnerService {
         }
       }, 100);
     });
-  }
-
-  private log(message: string, liveLogConsole: boolean) {
-    if (liveLogConsole) {
-      console.log(message);
-    } else {
-      this.console.log(message);
-    }
   }
 }
