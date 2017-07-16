@@ -174,11 +174,27 @@ export class TaskRunnerService {
 
           return Promise.resolve(undefined)
             .then(() => { runningTask.currentCommand = command; })
-            .then(() => this.shell.execute(command.command, { cwd }, runningTask));
+            .then(() => this.shell.execute(command.command, { cwd }, result => { this.updateProgressLogLine(runningTask, result); }))
+            .then(result => { this.logCommandResult(runningTask, result); })
+            .catch(result => { this.logCommandResult(runningTask, result); throw result; });
         });
     }
 
     return runCommands;
+  }
+
+  private updateProgressLogLine(runningTask: RunningTask, result: ExecResult) {
+    const progressPattern = /[0-9]+%/;
+
+    const output = this.formatOutput(result.stdout).trim();
+    const lastLine = output.substring(output.lastIndexOf('\n'));
+
+    const stderr = this.formatOutput(result.stderr).trim();
+    const lastErrorLine = stderr.substring(stderr.lastIndexOf('\n'));
+
+    runningTask.progressLogLine = progressPattern.test(lastErrorLine) ?
+      lastErrorLine.trim() :
+      (lastLine ? lastLine.trim() : undefined);
   }
 
   private waitUntilTaskIsComplete(runningTasks: RunningTask[]): Promise<RunningTask[]> {
@@ -204,5 +220,33 @@ export class TaskRunnerService {
         }
       }, 100);
     });
+  }
+
+  private logCommandResult(runningTask: RunningTask, result: ExecResult) {
+    const logText = runningTask ? this.getLogText(runningTask, result) : undefined;
+    const isError = result.error !== undefined;
+    this.logService.log(logText, isError);
+  }
+
+  private getLogText(runningTask: RunningTask, result: ExecResult) {
+    return `
+------------------------------------------------------------------------------------------
+Config: ${path.join(runningTask.project.projectPath, 'arbor.json')}
+Project: ${runningTask.project.name}
+Task: ${runningTask.taskName}
+Command: ${result.cwd}> ${result.command}
+
+${result.error ? `* Error:\n${JSON.stringify(result.error)}\n` : ''}
+${result.stdout ? `* Standard Output:\n${this.formatOutput(result.stdout)}\n` : ''}
+${result.stderr ? `* Standard Error:\n${this.formatOutput(result.stderr)}\n` : ''}
+------------------------------------------------------------------------------------------`;
+  }
+
+  private formatOutput(output: string) {
+    const backspaces = /[\b][\b|\s]+[\b]/g;
+
+    return output
+      .replace(backspaces, '\n')
+      .trim();
   }
 }
