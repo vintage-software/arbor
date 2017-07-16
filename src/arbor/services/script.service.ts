@@ -3,7 +3,7 @@ import * as chalk from 'chalk';
 import { writeFileSync } from 'fs';
 import * as path from 'path';
 
-import { ScriptOptions } from './../helpers/options';
+import { ScriptOptions } from './../commands/script.command';
 import { Project } from './../helpers/project';
 import { DependencyGraphService } from './dependency-graph.service';
 import { ProjectService } from './project.service';

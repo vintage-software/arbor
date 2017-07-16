@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 
-import { RunOptions } from './../helpers/options';
+import { RunOptions } from './../commands/run.command';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
 

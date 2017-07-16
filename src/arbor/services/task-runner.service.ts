@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as path from 'path';
 
-import { RunOptions } from './../helpers/options';
+import { RunOptions } from './../commands/run.command';
 import { Project } from './../helpers/project';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
 import { ConsoleService } from './console.service';
