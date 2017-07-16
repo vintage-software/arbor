@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 
+import { environment } from './../../common/environments/environment';
 import { ConsoleService } from './console.service';
 import { ShellService } from './shell.service';
-
-export const currentVersion = require('./../../../package.json').version;
 
 @Injectable()
 export class VersionService {
@@ -20,10 +19,10 @@ export class VersionService {
   }
 
   private showUpdateMessage(latestVersion: string) {
-    if (currentVersion !== latestVersion) {
+    if (environment.version !== latestVersion) {
       this.console.log(`
   New version available. Run ${chalk.yellow('npm install -g arbor')} to update.
-  Local Version: ${currentVersion}
+  Local Version: ${environment.version}
   Latest Version: ${latestVersion}
       `);
     }

@@ -3,11 +3,11 @@ import * as chalk from 'chalk';
 import { writeFileSync } from 'fs';
 import * as path from 'path';
 
+import { environment } from './../../common/environments/environment';
 import { ScriptOptions } from './../commands/script.command';
 import { Project } from './../helpers/project';
 import { DependencyGraphService } from './dependency-graph.service';
 import { ProjectService } from './project.service';
-import { currentVersion } from './version.service';
 
 @Injectable()
 export class ScriptService {
@@ -21,7 +21,7 @@ export class ScriptService {
     }
 
     if (taskNames.length) {
-      console.log(`Arbor v${currentVersion}: scripting tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+      console.log(`Arbor v${environment.version}: scripting tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
       this.projectService.getProjects()
         .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))

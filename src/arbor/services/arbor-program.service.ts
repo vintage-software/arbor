@@ -3,8 +3,9 @@ import * as program from 'commander';
 
 import { RunCommand, RunOptions } from '../commands/run.command';
 import { ScriptCommand, ScriptOptions } from '../commands/script.command';
+import { environment } from './../../common/environments/environment';
 import { ConfigService } from './config.service';
-import { currentVersion, VersionService } from './version.service';
+import { VersionService } from './version.service';
 
 @Injectable()
 export class ArborProgramService {
@@ -24,7 +25,7 @@ export class ArborProgramService {
   }
 
   private registerCommands() {
-    program.version(currentVersion);
+    program.version(environment.version);
 
     program
       .command('init')
@@ -47,8 +48,8 @@ export class ArborProgramService {
   }
 
   private mapVersionFlag() {
-    // maps lower -v to the version flag of commander
     const vPos = process.argv.indexOf('-v');
+
     if (vPos > -1) {
       process.argv[vPos] = '-V';
     }

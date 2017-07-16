@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as path from 'path';
 
+import { environment } from './../../common/environments/environment';
 import { RunOptions } from './../commands/run.command';
 import { Project } from './../helpers/project';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
@@ -10,7 +11,6 @@ import { LogService } from './log.service';
 import { ProgressService } from './progress.service';
 import { ProjectService } from './project.service';
 import { ExecResult, ShellService } from './shell.service';
-import { currentVersion } from './version.service';
 
 @Injectable()
 export class TaskRunnerService {
@@ -24,7 +24,7 @@ export class TaskRunnerService {
   }
 
   runTasks(taskNames: string[], options: RunOptions) {
-    this.log(`Arbor v${currentVersion}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`, options.liveLogConsole);
+    this.log(`Arbor v${environment.version}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`, options.liveLogConsole);
 
     if (options.liveLogFile) {
       this.log('Live log is enabled.', options.liveLogConsole);
