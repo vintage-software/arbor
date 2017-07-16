@@ -1,0 +1,17 @@
+{
+  "name": "arbor-ci",
+  "version": "0.0.0-PLACEHOLDER",
+  "description": "A simple CI system for Arbor-based builds",
+  "main": "index.js",
+  "bin": {
+    "arbor": "index.js"
+  },
+  "private": true,
+  "keywords": [
+    "Build",
+    "Tool",
+    "CI"
+  ],
+  "dependencies": {
+  }
+}

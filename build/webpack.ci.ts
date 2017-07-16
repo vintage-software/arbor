@@ -13,10 +13,10 @@ export default {
     webpackNodeExternals()
   ],
   entry: {
-    'index': './src/server/index.ts'
+    'index': './src/arbor-ci/index.ts'
   },
   output: {
-    path: path.resolve('./dist/arbor-ci-server'),
+    path: path.resolve('./dist/arbor-ci'),
     filename: '[name].js'
   },
   resolve: {
@@ -28,13 +28,13 @@ export default {
         test: /\.ts$/,
         use: {
           loader: 'awesome-typescript-loader',
-          options: { configFileName: './src/server/tsconfig.json' }
+          options: { configFileName: './src/arbor-ci/tsconfig.json' }
         }
       }
     ]
   },
   plugins: [
-    new PackageManifestWebpackPlugin('./src/server/package.json'),
+    new PackageManifestWebpackPlugin('./src/arbor-ci/package.json'),
     new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }),
     ...(production ? [new webpack.NoEmitOnErrorsPlugin()] : [])
   ]

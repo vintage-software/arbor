@@ -25,7 +25,7 @@ export default {
     'styles': './src/web/styles.scss',
   },
   output: {
-    path: path.resolve('./dist/arbor-ci-server/web'),
+    path: path.resolve('./dist/arbor-ci/web'),
     filename: production ? '[name].[hash].js' : '[name].js'
   },
   resolve: {

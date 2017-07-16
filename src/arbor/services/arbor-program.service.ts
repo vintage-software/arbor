@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as program from 'commander';
-
 import { RunCommand, RunOptions } from '../commands/run.command';
 import { ScriptCommand, ScriptOptions } from '../commands/script.command';
 import { environment } from './../../common/environments/environment';
+import { VersionService } from './../../common/services/version.service';
 import { ConfigService } from './config.service';
-import { VersionService } from './version.service';
 
 @Injectable()
 export class ArborProgramService {
@@ -20,7 +19,7 @@ export class ArborProgramService {
     this.mapVersionFlag();
     this.registerCommands();
 
-    this.versionService.checkForUpdate()
+    this.versionService.checkForUpdate('arbor')
       .then(() => { program.parse(process.argv); });
   }
 

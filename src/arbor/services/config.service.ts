@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 import * as fs from 'fs';
 
-import { ConsoleService } from './../services/console.service';
+import { ConsoleService } from './../../common/services/console.service';
 
 @Injectable()
 export class ConfigService {

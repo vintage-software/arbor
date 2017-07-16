@@ -2,15 +2,15 @@ import { Injectable } from '@angular/core';
 import * as path from 'path';
 
 import { environment } from './../../common/environments/environment';
+import { ConsoleService } from './../../common/services/console.service';
+import { ExecResult, ShellService } from './../../common/services/shell.service';
 import { RunOptions } from './../commands/run.command';
 import { Project } from './../helpers/project';
 import { RunningTask, TaskStatus } from './../helpers/running-task';
-import { ConsoleService } from './console.service';
 import { DependencyGraphService } from './dependency-graph.service';
 import { LogService } from './log.service';
 import { ProgressService } from './progress.service';
 import { ProjectService } from './project.service';
-import { ExecResult, ShellService } from './shell.service';
 
 @Injectable()
 export class TaskRunnerService {
