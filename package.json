@@ -1,6 +1,6 @@
 {
   "name": "arbor",
-  "version": "0.7.1",
+  "version": "0.7.3",
   "private": true,
   "scripts": {
     "start": "cd ./dist/arbor-ci-server && nodemon index.js",
