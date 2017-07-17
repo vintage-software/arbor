@@ -102,8 +102,6 @@ export class FirebaseService {
   }
 
   private calculateBuildStatus(inProgress: boolean, buildProgress: BuildProgess) {
-    console.log('calculateBuildStatus', inProgress, buildProgress);
-
     const taskStatuses = (buildProgress ? buildProgress.tasks || [] : [])
       .map(task => task.projects.map(taskProject => taskProject.status))
       .reduce((all, current) => all.concat(current), []);
