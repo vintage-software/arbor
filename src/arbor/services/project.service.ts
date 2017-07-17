@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Project } from './../helpers/project';
+import { Project } from './../../common/interfaces/project';
 
 @Injectable()
 export class ProjectService {

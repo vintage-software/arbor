@@ -4,8 +4,8 @@ import { writeFileSync } from 'fs';
 import * as path from 'path';
 
 import { environment } from './../../common/environments/environment';
+import { Project } from './../../common/interfaces/project';
 import { ScriptOptions } from './../commands/script.command';
-import { Project } from './../helpers/project';
 import { DependencyGraphService } from './dependency-graph.service';
 import { ProjectService } from './project.service';
 

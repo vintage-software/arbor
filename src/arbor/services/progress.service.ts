@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 
+import { RunningTask, TaskStatus } from './../../common/interfaces/running-task';
 import { ConsoleService } from './../../common/services/console.service';
-import { RunningTask, TaskStatus } from './../helpers/running-task';
 
 @Injectable()
 export class ProgressService {

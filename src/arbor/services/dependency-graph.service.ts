@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { DepGraph } from 'dependency-graph';
 
-import { Project } from './../helpers/project';
+import { Project } from './../../common/interfaces/project';
 
 @Injectable()
 export class DependencyGraphService {
