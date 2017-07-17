@@ -21,7 +21,8 @@ export interface TaskProgress {
   projects: ProjectTaskProgress[];
 }
 
-export interface BuildProgess {
+export interface BuildProgress {
+  checkout: TaskProgress[];
   tasks: TaskProgress[];
 }
 
@@ -29,5 +30,5 @@ export interface Build {
   buildId: number;
   configuration: string;
   status: BuildStatus;
-  progress?: BuildProgess;
+  progress?: BuildProgress;
 }

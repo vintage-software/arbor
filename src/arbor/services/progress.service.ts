@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 
-import { BuildProgess } from './../../common/interfaces/build';
+import { TaskProgress } from './../../common/interfaces/build';
 import { RunningTask, TaskStatus } from './../../common/interfaces/running-task';
 import { ConsoleService } from './../../common/services/console.service';
 
 @Injectable()
 export class ProgressService {
-  private buildProgress: BuildProgess = { tasks: [] };
+  private buildTasks: TaskProgress[] = [];
 
   constructor(private console: ConsoleService) { }
 
   updateRunningTasks(runningTasks: RunningTask[]) {
-    this.buildProgress = ProgressService.computeUpdatedBuildProgress(this.buildProgress, runningTasks);
+    this.buildTasks = ProgressService.computeUpdatedProgress(this.buildTasks, runningTasks);
 
     if (process.send) {
-      process.send({ type: 'build-progress', buildProgress: this.buildProgress });
+      process.send({ type: 'build-tasks', buildTasks: this.buildTasks });
     }
 
     const output = runningTasks
@@ -29,25 +29,25 @@ export class ProgressService {
     this.console.finalizeProgress();
   }
 
-  private static computeUpdatedBuildProgress(buildProgress: BuildProgess, runningTasks: RunningTask[]) {
-    buildProgress = { ...buildProgress };
+  static computeUpdatedProgress(buildTasks: TaskProgress[], runningTasks: RunningTask[]) {
+    buildTasks = [ ...buildTasks ];
 
     for (const runningTask of runningTasks) {
       const taskName = runningTask.taskName;
       const projectName = runningTask.project.name;
 
-      let taskStatus = buildProgress.tasks.find(task => task.taskName === taskName);
+      let buildTask = buildTasks.find(task => task.taskName === taskName);
 
-      if (taskStatus === undefined) {
-        taskStatus = { taskName, projects: [] };
-        buildProgress.tasks.push(taskStatus);
+      if (buildTask === undefined) {
+        buildTask = { taskName, projects: [] };
+        buildTasks.push(buildTask);
       }
 
-      let projectTaskStatus = taskStatus.projects.find(project => project.projectName === projectName);
+      let projectTaskStatus = buildTask.projects.find(project => project.projectName === projectName);
 
       if (projectTaskStatus === undefined) {
         projectTaskStatus = { projectName };
-        taskStatus.projects.push(projectTaskStatus);
+        buildTask.projects.push(projectTaskStatus);
       }
 
       const showProgressLine = runningTask.progressLogLine && runningTask.currentCommand.noProgress !== true;
@@ -57,7 +57,7 @@ export class ProgressService {
       projectTaskStatus.progressLogLine = showProgressLine ? runningTask.progressLogLine : null;
     }
 
-    return buildProgress;
+    return buildTasks;
   }
 
   private static getStatusText(runningTask: RunningTask, useProgressLine = true, useColor = true) {
@@ -93,9 +93,13 @@ export class ProgressService {
   }
 
   private static getDefaultStatusText(taskName: string): string {
-    let status = 'processing';
+    let status = 'in progress';
 
-    if (taskName.indexOf('install') > -1) {
+    if (taskName.indexOf('clean') > -1) {
+      status = 'cleaning';
+    } else if (taskName.indexOf('clone') > -1) {
+      status = 'cloning';
+    } else if (taskName.indexOf('install') > -1) {
       status = 'installing';
     } else if (taskName.indexOf('build') > -1) {
       status = 'building';

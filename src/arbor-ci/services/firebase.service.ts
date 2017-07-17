@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { readFileIfExists } from '../../common/helpers/fs.helpers';
 import { TaskStatus } from '../../common/interfaces/running-task';
-import { Build, BuildProgess, BuildStatus } from './../../common/interfaces/build';
+import { Build, BuildProgress, BuildStatus, TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration } from './../../common/interfaces/build-configuration';
 
 const firebaseConfigPath = './arbor-firebase-config.json';
@@ -78,39 +78,33 @@ export class FirebaseService {
     });
   }
 
-  updateBuildProgress(buildId: number, buildProgress: BuildProgess) {
+  updateBuildProgress(buildId: number, tasks: TaskProgress[], type: 'checkout' | 'tasks') {
     const updateProgress = new Observable<void>(observer => {
-      this.firebaseDatabase.ref(`builds/${buildId}/progress`).set(buildProgress)
+      this.firebaseDatabase.ref(`builds/${buildId}/progress/${type}`).set(tasks)
         .then(() => { observer.next(void 0); observer.complete(); })
         .catch(error => { observer.error(error); });
     });
 
     return updateProgress
-      .switchMap(() => this.updateBuildStatus(buildId, true, buildProgress))
+      .switchMap(() => this.updateBuildStatus(buildId, true))
       .mapTo(void 0);
   }
 
-  updateBuildStatus(buildId: number, inProgress: boolean, syncBuildProgress?: BuildProgess) {
-    let getBuildProgress = Observable.of(syncBuildProgress);
-
-    if (syncBuildProgress === undefined) {
-      getBuildProgress = this.getBuild(buildId).do(build => { console.log('build', build); }).map(build => build.progress);
-    }
-
-    return getBuildProgress
-      .map(buildProgress => this.calculateBuildStatus(inProgress, buildProgress))
-      .switchMap(buildStatus => this.setBuildStatus(buildId, buildStatus));
+  updateBuildStatus(buildId: number, inProgress: boolean) {
+    return this.getBuild(buildId)
+      .map(build => this.calculateBuildStatus(inProgress, build.progress))
+      .switchMap(buildStatus => this.setBuildStatus(buildId, buildStatus).mapTo(buildStatus));
   }
 
   setBuildStatus(buildId: number, buildStatus: BuildStatus) {
-    return new Observable<BuildStatus>(observer => {
+    return new Observable<void>(observer => {
       this.firebaseDatabase.ref(`builds/${buildId}/status`).set(buildStatus)
-        .then(() => { observer.next(buildStatus); observer.complete(); })
+        .then(() => { observer.next(void 0); observer.complete(); })
         .catch(error => { observer.error(error); });
     });
   }
 
-  private calculateBuildStatus(inProgress: boolean, buildProgress: BuildProgess) {
+  private calculateBuildStatus(inProgress: boolean, buildProgress: BuildProgress) {
     const taskStatuses = (buildProgress ? buildProgress.tasks || [] : [])
       .map(task => task.projects.map(taskProject => taskProject.status))
       .reduce((all, current) => all.concat(current), []);

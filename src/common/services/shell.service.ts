@@ -20,7 +20,7 @@ export class ShellService {
   constructor() { }
 
   execute(command: string, options?: SpawnOptions, continuousCallback?: (result: ExecResult) => void): Promise<ExecResult> {
-    const cwd = options.cwd || process.cwd();
+    const cwd = options && options.cwd || process.cwd();
 
     const commandAndArgs = process.platform === 'win32' ?
       { command: 'cmd', args: ['/c', command] } : { command: 'sh', args: ['-c', command] };

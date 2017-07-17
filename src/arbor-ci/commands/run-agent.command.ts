@@ -5,12 +5,13 @@ import { Build, BuildStatus } from '../../common/interfaces/build';
 import { environment } from './../../common/environments/environment';
 import { ShellService } from './../../common/services/shell.service';
 import { FirebaseService } from './../services/firebase.service';
+import { GitService } from './../services/git-service';
 
 const arborPath = path.join(path.dirname(process.argv[1]), 'arbor.js');
 
 @Injectable()
 export class RunAgentCommand {
-  constructor(private firebase: FirebaseService, private shell: ShellService) { }
+  constructor(private firebase: FirebaseService, private git: GitService, private shell: ShellService) { }
 
   run() {
     console.log(`Arbor-CI v${environment.version}: Running build agent.`);
@@ -27,8 +28,8 @@ export class RunAgentCommand {
 
   private runBuild(build: Build) {
     const handleMessage = (message: any) => {
-      if (message.type === 'build-progress') {
-        this.firebase.updateBuildProgress(build.buildId, message.buildProgress).subscribe(() => { });
+      if (message.type === 'build-tasks') {
+        this.firebase.updateBuildProgress(build.buildId, message.buildTasks, 'tasks').subscribe(() => { });
       }
     };
 
@@ -37,7 +38,8 @@ export class RunAgentCommand {
       .do(() => {
         console.log(`Build ${build.buildId} started with the "${build.configuration}" build configuration.`);
       })
-      .switchMap(buildConfiguration => this.shell.fork(arborPath, ['run', ...buildConfiguration.tasks], { cwd: 'C:/Builds' }, handleMessage))
+      .switchMap(configuration => this.git.cloneRepos(build.buildId, configuration).mapTo(configuration))
+      .switchMap(configuration => this.shell.fork(arborPath, ['run', ...configuration.tasks], { cwd: './checkout' }, handleMessage))
       .switchMap(() => this.firebase.updateBuildStatus(build.buildId, false))
       .do(buildStatus => {
         console.log(`Build ${build.buildId} completed with ${buildStatus === BuildStatus.Passed ? 'success' : 'failure'}.`);

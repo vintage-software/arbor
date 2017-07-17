@@ -1,8 +1,8 @@
 export interface Project {
   name: string;
-  cwd: string;
-  tasks: { [index: string]: Task };
-  dependencies: string[];
+  cwd?: string;
+  tasks?: { [index: string]: Task };
+  dependencies?: string[];
   projectPath: string;
 }
 

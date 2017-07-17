@@ -5,12 +5,14 @@ import { DeployServerCommand } from './commands/deploy-server.command';
 import { RunAgentCommand } from './commands/run-agent.command';
 import { ArborCiProgramService } from './services/arbor-ci-program.service';
 import { FirebaseService } from './services/firebase.service';
+import { GitService } from './services/git-service';
 
 export const providers = [
   ArborCiProgramService,
   ConsoleService,
   DeployServerCommand,
   FirebaseService,
+  GitService,
   RunAgentCommand,
   ShellService,
   VersionService

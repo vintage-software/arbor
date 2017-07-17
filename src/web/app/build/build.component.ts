@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { TaskStatus } from '../../../common/interfaces/running-task';
-import { Build, BuildStatus, ProjectTaskProgress } from './../../../common/interfaces/build';
+import { Build, BuildStatus, TaskProgress } from './../../../common/interfaces/build';
 import { BuildsService } from './../shared/services/builds.service';
 
 @Component({
@@ -13,15 +13,17 @@ import { BuildsService } from './../shared/services/builds.service';
 })
 export class BuildComponent {
   readonly build: Observable<Build>;
+  readonly combinedTasks: Observable<TaskProgress[]>;
 
   readonly BuildStatus = BuildStatus;
 
   constructor(private activatedRoute: ActivatedRoute, private buildsService: BuildsService) {
     this.build = this.getBuild().shareReplay(1);
+    this.combinedTasks = this.getCombinedTasks(this.build).shareReplay(1);
   }
 
-  statusColor(projectTask: ProjectTaskProgress) {
-    switch (projectTask.status) {
+  statusColor(status: TaskStatus) {
+    switch (status) {
       case TaskStatus.Waiting:
         return 'gray';
       case TaskStatus.Success:
@@ -41,5 +43,11 @@ export class BuildComponent {
     return this.activatedRoute.params
       .map(params => +params['buildId'])
       .switchMap(buildId => this.buildsService.getBuild(buildId));
+  }
+
+  private getCombinedTasks(getBuild: Observable<Build>) {
+    return getBuild
+      .map(build => build.progress ? build.progress : { checkout: [], tasks: [] })
+      .map(progress => [...(progress.checkout ? progress.checkout : []), ...(progress.tasks ? progress.tasks : [])]);
   }
 }
