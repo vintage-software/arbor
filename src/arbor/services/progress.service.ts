@@ -38,7 +38,7 @@ export class ProgressService {
       case TaskStatus.DependendecyFailed:
         statusText = chalk.red('dependency failed!');
         break;
-      case TaskStatus.InProcess:
+      case TaskStatus.InProgress:
         const showProgress = runningTask.currentCommand.noProgress !== true;
         const status = `${runningTask.statusText ? runningTask.statusText : defaultStatus}...`;
         const progress = showProgress && runningTask.progressLogLine ? runningTask.progressLogLine : '';

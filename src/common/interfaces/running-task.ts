@@ -2,7 +2,7 @@ import { Command, Project } from './project';
 
 export enum TaskStatus {
   Waiting,
-  InProcess,
+  InProgress,
   Success,
   Failed,
   DependendecyFailed

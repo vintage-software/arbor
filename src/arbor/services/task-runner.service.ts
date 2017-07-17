@@ -147,7 +147,7 @@ export class TaskRunnerService {
   }
 
   private startTask(runningTask: RunningTask): Promise<ExecResult> {
-    runningTask.status = TaskStatus.InProcess;
+    runningTask.status = TaskStatus.InProgress;
 
     const task = runningTask.project.tasks[runningTask.taskName];
 
@@ -204,7 +204,7 @@ export class TaskRunnerService {
         this.progressService.updateRunningTasks(runningTasks);
 
         const completedTasks = runningTasks
-          .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProcess);
+          .filter(runningTask => runningTask.status !== TaskStatus.Waiting && runningTask.status !== TaskStatus.InProgress);
 
         if (completedTasks.length === runningTasks.length) {
           this.progressService.finalizeRunningTasks();
