@@ -53,6 +53,8 @@ export class ShellService {
 
       spawnedProcess.on('error', (error: Error) => { handleResult(error); });
       spawnedProcess.on('exit', (code, signal) => { handleResult(undefined, code, signal); });
+
+      return () => { spawnedProcess.kill(); };
     });
   }
 
@@ -90,6 +92,8 @@ export class ShellService {
 
       forkedProcess.on('error', (error: Error) => { handleResult(error); });
       forkedProcess.on('exit', (code, signal) => { handleResult(undefined, code, signal); });
+
+      return () => { forkedProcess.kill(); };
     });
   }
 
