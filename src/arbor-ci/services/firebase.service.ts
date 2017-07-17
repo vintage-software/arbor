@@ -86,7 +86,8 @@ export class FirebaseService {
     });
 
     return updateProgress
-      .switchMap(() => this.updateBuildStatus(buildId, true, buildProgress));
+      .switchMap(() => this.updateBuildStatus(buildId, true, buildProgress))
+      .mapTo(void 0);
   }
 
   updateBuildStatus(buildId: number, inProgress: boolean, syncBuildProgress?: BuildProgess) {
@@ -99,6 +100,14 @@ export class FirebaseService {
     return getBuildProgress
       .map(buildProgress => this.calculateBuildStatus(inProgress, buildProgress))
       .switchMap(buildStatus => this.setBuildStatus(buildId, buildStatus));
+  }
+
+  setBuildStatus(buildId: number, buildStatus: BuildStatus) {
+    return new Observable<BuildStatus>(observer => {
+      this.firebaseDatabase.ref(`builds/${buildId}/status`).set(buildStatus)
+        .then(() => { observer.next(buildStatus); observer.complete(); })
+        .catch(error => { observer.error(error); });
+    });
   }
 
   private calculateBuildStatus(inProgress: boolean, buildProgress: BuildProgess) {
@@ -117,13 +126,5 @@ export class FirebaseService {
     } else {
       return BuildStatus.Passed;
     }
-  }
-
-  private setBuildStatus(buildId: number, buildStatus: BuildStatus) {
-    return new Observable<void>(observer => {
-      this.firebaseDatabase.ref(`builds/${buildId}/status`).set(buildStatus)
-        .then(() => { observer.next(void 0); observer.complete(); })
-        .catch(error => { observer.error(error); });
-    });
   }
 }

@@ -5,7 +5,8 @@ export enum BuildStatus {
   InProgress,
   Failing,
   Passed,
-  Failed
+  Failed,
+  Errored
 }
 
 export interface ProjectTaskProgress {

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as path from 'path';
-import { Observable } from 'rxjs/Observable';
 
-import { Build } from '../../common/interfaces/build';
+import { Build, BuildStatus } from '../../common/interfaces/build';
 import { environment } from './../../common/environments/environment';
 import { ShellService } from './../../common/services/shell.service';
 import { FirebaseService } from './../services/firebase.service';
@@ -33,12 +32,19 @@ export class RunAgentCommand {
       }
     };
 
-    return this.firebase.updateBuildStatus(build.buildId, true)
+    return this.firebase.setBuildStatus(build.buildId, BuildStatus.InProgress)
       .switchMap(() => this.firebase.getBuildConfigration(build.configuration))
-      .do(() => { console.log(`Build ${build.buildId} started with the "${build.configuration}" build configuration.`); })
+      .do(() => {
+        console.log(`Build ${build.buildId} started with the "${build.configuration}" build configuration.`);
+      })
       .switchMap(buildConfiguration => this.shell.fork(arborPath, ['run', ...buildConfiguration.tasks], { cwd: 'C:/Builds' }, handleMessage))
       .switchMap(() => this.firebase.updateBuildStatus(build.buildId, false))
-      .do(() => { console.log(`Build ${build.buildId} completed with success.`); })
-      .catch(error => { console.log(`Build ${build.buildId}: completed with failure.`, error); return Observable.of(undefined); });
+      .do(buildStatus => {
+        console.log(`Build ${build.buildId} completed with ${buildStatus === BuildStatus.Passed ? 'success' : 'failure'}.`);
+      })
+      .catch(error => {
+        console.log(`Build ${build.buildId}: completed with error.`, error);
+        return this.firebase.setBuildStatus(build.buildId, BuildStatus.Errored);
+      });
   }
 }
