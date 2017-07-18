@@ -1,4 +1,5 @@
-<button md-raised-button (click)="queueBuild()">Queue Build</button> | There are {{ queuedBuildCount | async }} builds in the queue.
+<button md-raised-button (click)="queueBuild()">Queue Build</button>
+<span *ngIf="queuedBuildCount | async; let queuedBuildCount">There are {{ queuedBuildCount }} builds in the queue.</span>
 <hr />
 
 <app-builds-table title="In Progress Builds" [builds]="inProgressBuilds | async"></app-builds-table>
