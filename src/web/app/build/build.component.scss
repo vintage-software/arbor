@@ -2,12 +2,15 @@ $color-terminal-background: #1d1d1d;
 
 .build-progress {
   padding: 8px;
-  margin: 16px 0;
   font-family: monospace;
   color: whitesmoke;
   background: $color-terminal-background;
 
   &__task {
+    margin-bottom: 8px;
+  }
+
+  &__task-name {
     display: inline-block;
     margin: 8px 0;
   }
