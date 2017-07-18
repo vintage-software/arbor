@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularFireModule } from 'angularfire2';
@@ -12,8 +13,10 @@ import { BuildComponent } from './build/build.component';
 import { BuildsComponent } from './builds/builds.component';
 import { firebaseAppConfig } from './firebase.init';
 import { BuildsTableComponent } from './shared/components/builds-table/builds-table.component';
+import { QueueBuildDialogComponent } from './shared/components/queue-build-dialog/queue-build-dialog.component';
 import { EnumValuePipe } from './shared/pipes/enum-value.pipe';
 import { BuildsService } from './shared/services/builds.service';
+import { SettingsService } from './shared/services/settings.service';
 
 @NgModule({
   declarations: [
@@ -21,11 +24,13 @@ import { BuildsService } from './shared/services/builds.service';
     BuildComponent,
     BuildsComponent,
     BuildsTableComponent,
-    EnumValuePipe
+    EnumValuePipe,
+    QueueBuildDialogComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    ReactiveFormsModule,
     AngularFireModule.initializeApp(firebaseAppConfig),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
@@ -33,8 +38,14 @@ import { BuildsService } from './shared/services/builds.service';
     AppMaterialModule
   ],
   providers: [
-    BuildsService
+    BuildsService,
+    SettingsService
   ],
-  bootstrap: [AppComponent]
+  entryComponents: [
+    QueueBuildDialogComponent
+  ],
+  bootstrap: [
+    AppComponent
+  ]
 })
 export class AppModule { }

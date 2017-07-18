@@ -26,7 +26,11 @@ export interface BuildProgress {
   tasks: TaskProgress[];
 }
 
-export interface Build {
+export interface BuildOptions {
+  configuration: string;
+}
+
+export interface Build extends BuildOptions {
   buildId: number;
   configuration: string;
   status: BuildStatus;

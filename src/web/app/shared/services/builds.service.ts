@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
 
-import { Build, BuildStatus } from '../../../../common/interfaces/build';
+import { Build, BuildOptions, BuildStatus } from '../../../../common/interfaces/build';
 
 @Injectable()
 export class BuildsService {
@@ -22,7 +22,7 @@ export class BuildsService {
     }) as Observable<Build[]>;
   }
 
-  queueBuild() {
+  queueBuild(buildOptions: BuildOptions) {
     return new Observable<number>(observer => {
       this.firebaseDatabase.database.ref('counters/builds')
         .transaction(buildCounter => (buildCounter || 0) + 1, (transactionError, committed, snapshot) => {
@@ -31,8 +31,8 @@ export class BuildsService {
 
             const build: Build = {
               buildId,
-              configuration: 'default',
-              status: BuildStatus.Queued
+              status: BuildStatus.Queued,
+              ...buildOptions
             };
 
             this.firebaseDatabase.database.ref(`builds/${buildId}`).set(build)

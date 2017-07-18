@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
+import { MdDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { Build, BuildStatus } from './../../../common/interfaces/build';
+import { Build, BuildOptions, BuildStatus } from './../../../common/interfaces/build';
+import { QueueBuildDialogComponent } from './../shared/components/queue-build-dialog/queue-build-dialog.component';
 import { BuildsService } from './../shared/services/builds.service';
 
 @Component({
@@ -14,7 +17,11 @@ export class BuildsComponent {
   readonly inProgressBuilds: Observable<Build[]>;
   readonly inProgressBuildsDataSource: any;
 
-  constructor(private buildsService: BuildsService) {
+  constructor(
+    private dialog: MdDialog,
+    private router: Router,
+    private buildsService: BuildsService) {
+
     this.queuedBuildCount = this.buildsService.getBuildsByStatus(BuildStatus.Queued)
       .map(builds => builds.length)
       .shareReplay(1);
@@ -28,6 +35,12 @@ export class BuildsComponent {
   }
 
   queueBuild() {
-    this.buildsService.queueBuild().subscribe(() => { });
+    const queueBuildDialogRef = QueueBuildDialogComponent.showDialog(this.dialog);
+
+    queueBuildDialogRef.afterClosed()
+      .filter(buildOptions => buildOptions !== undefined)
+      .switchMap((buildOptions: BuildOptions) => this.buildsService.queueBuild(buildOptions))
+      .switchMap(buildId => this.router.navigate(['/builds', buildId]))
+      .subscribe(() => { });
   }
 }

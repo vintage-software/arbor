@@ -1,7 +1,9 @@
+import { SimpleMap } from './../helpers/object.helpers';
+
 export interface Project {
   name: string;
   cwd?: string;
-  tasks?: { [index: string]: Task };
+  tasks?: SimpleMap<Task>;
   dependencies?: string[];
   projectPath: string;
 }
