@@ -2,7 +2,7 @@
   <md-toolbar color="accent">
     <img class="logo" src="/assets/images/logo.svg" />
     <a routerLink="/">Arbor CI Server</a>
-    <span class="fill"></span>
+    <span class="flex-fill"></span>
     <span *ngIf="user | async; let user">
       {{ user.displayName }}
       <button md-raised-button  (click)="logout()">Logout</button>
