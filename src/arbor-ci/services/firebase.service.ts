@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import * as chalk from 'chalk';
 import * as firebase from 'firebase-admin';
 import { Observable } from 'rxjs/Observable';
 
@@ -7,7 +8,7 @@ import { TaskStatus } from '../../common/interfaces/running-task';
 import { Build, BuildProgress, BuildStatus, TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration } from './../../common/interfaces/build-configuration';
 
-const firebaseConfigPath = './arbor-firebase-config.json';
+const firebaseConfigPath = 'arbor-firebase-config.json';
 
 interface FirebaseConfig {
   crendential: firebase.ServiceAccount;
@@ -16,23 +17,32 @@ interface FirebaseConfig {
 
 @Injectable()
 export class FirebaseService {
-  private readonly firebaseDatabase: firebase.database.Database;
+  private __firebaseDatabase: firebase.database.Database;
 
-  constructor() {
-    const firebaseConfigJson = readFileIfExists(firebaseConfigPath);
+  get firebaseDatabase() {
+    if (this.__firebaseDatabase === undefined) {
+      const firebaseConfigJson = readFileIfExists(firebaseConfigPath);
 
-    if (firebaseConfigJson) {
-      const firebaseConfig: FirebaseConfig = JSON.parse(firebaseConfigJson);
+      if (firebaseConfigJson === undefined) {
+        console.log(chalk.red(`ERROR: ${firebaseConfigPath} not found. This file must contain your service credentials.`));
+        process.exit(1);
+      } else {
+        const firebaseConfig: FirebaseConfig = JSON.parse(firebaseConfigJson);
 
-      const firebaseApp = firebase.initializeApp({
-        credential: firebase.credential.cert(firebaseConfig.crendential),
-        databaseURL: firebaseConfig.databaseURL
-      });
+        const firebaseApp = firebase.initializeApp({
+          credential: firebase.credential.cert(firebaseConfig.crendential),
+          databaseURL: firebaseConfig.databaseURL
+        });
 
-      this.firebaseDatabase = firebaseApp.database();
-      this.firebaseDatabase.goOnline();
+        this.__firebaseDatabase = firebaseApp.database();
+        this.firebaseDatabase.goOnline();
+      }
     }
+
+    return this.__firebaseDatabase;
   }
+
+  constructor() { }
 
   getBuildConfigration(name: string) {
     return new Observable<BuildConfiguration>(observer => {
