@@ -7,9 +7,6 @@
       {{ user.displayName }}
       <button md-raised-button  (click)="logout()">Logout</button>
     </span>
-    <span *ngIf="!(user | async)">
-      <button md-raised-button (click)="login()">Login</button>
-    </span>
   </md-toolbar>
 </header>
 

@@ -1,0 +1,8 @@
+<md-card *ngIf="!(user | async)">
+  <md-card-header>
+    <md-card-title>Not Logged In</md-card-title>
+  </md-card-header>
+  <md-card-actions>
+    <button md-button (click)="login()">Login</button>
+  </md-card-actions>
+</md-card>
