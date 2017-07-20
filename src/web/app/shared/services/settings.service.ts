@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
-import { AngularFireDatabase } from 'angularfire2/database';
-import { Observable } from 'rxjs/Observable';
 
 import { mapToArray, SimpleMap } from './../../../../common/helpers/object.helpers';
 import { BuildConfiguration } from './../../../../common/interfaces/build-configuration';
+import { DatabaseService } from './database.service';
 
 @Injectable()
 export class SettingsService {
-  constructor(private firebaseDatabase: AngularFireDatabase) { }
+  constructor(private database: DatabaseService) { }
 
   getBuildConfigurations() {
-    return (this.firebaseDatabase.object('build-configurations') as Observable<SimpleMap<BuildConfiguration>>)
+    return this.database.object<SimpleMap<BuildConfiguration>>('build-configurations')
       .map(buildConfigurationMap => mapToArray(buildConfigurationMap));
   }
 }

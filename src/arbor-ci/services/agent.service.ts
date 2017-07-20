@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as crypto from 'crypto';
 import * as os from 'os';
-import { Observable } from 'rxjs/Observable';
 
 import { TaskStatus } from '../../common/interfaces/running-task';
+import { mapToArray, SimpleMap } from './../../common/helpers/object.helpers';
+import { RxFire } from './../../common/helpers/rx-fire';
 import { Build, BuildProgress, BuildStatus, TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration } from './../../common/interfaces/build-configuration';
 import { FirebaseInitService } from './firebase-init.service';
@@ -12,12 +13,15 @@ import { FirebaseInitService } from './firebase-init.service';
 export class AgentService {
   readonly agentName: string;
 
+  private readonly rxFire: RxFire;
+
   constructor(private firebase: FirebaseInitService) {
     const cwd = process.cwd();
     const hostname = os.hostname();
     const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 5);
 
     this.agentName = `${hostname}-${cwdHash}`;
+    this.rxFire = new RxFire(firebase.app.database());
   }
 
   initialize() {
@@ -25,57 +29,22 @@ export class AgentService {
   }
 
   getBuildConfigration(name: string) {
-    return new Observable<BuildConfiguration>(observer => {
-      this.firebase.app.database().ref(`build-configurations/${name}`)
-        .once('value')
-        .then((snapshot: firebase.database.DataSnapshot) => { observer.next(snapshot.val()); observer.complete(); })
-        .catch(error => { observer.error(error); });
-    });
+    return this.rxFire.get<BuildConfiguration>(`build-configurations/${name}`).first();
   }
 
   getNextQueuedBuild() {
-    return new Observable<Build>(observer => {
-      const query = this.firebase.app.database().ref('builds')
-        .orderByChild('status')
-        .equalTo(BuildStatus.Queued)
-        .limitToFirst(1);
+    const nextQueuedBuildQuery = (ref: firebase.database.Reference) => ref
+      .orderByChild('status')
+      .equalTo(BuildStatus.Queued)
+      .limitToFirst(1);
 
-      const handleValue = (snapshot: firebase.database.DataSnapshot) => {
-        const value = snapshot.val();
-
-        if (value) {
-          const buildId = Object.keys(value)[0];
-
-          observer.next({ buildId, ...value[buildId] });
-          observer.complete();
-
-          query.off('value', handleValue);
-        }
-      };
-
-      query.on('value', handleValue);
-
-      return () => { query.off('value', handleValue); };
-    });
-  }
-
-  getBuild(buildId: number) {
-    return new Observable<Build>(observer => {
-      this.firebase.app.database().ref(`builds/${buildId}`)
-        .once('value')
-        .then((snapshot: firebase.database.DataSnapshot) => { observer.next(snapshot.val()); observer.complete(); })
-        .catch(error => { observer.error(error); });
-    });
+    return this.rxFire.get<SimpleMap<Build>>('builds', nextQueuedBuildQuery)
+      .first()
+      .map(buildMap => mapToArray(buildMap)[0]);
   }
 
   updateBuildProgress(buildId: number, tasks: TaskProgress[], type: 'checkout' | 'tasks') {
-    const updateProgress = new Observable<void>(observer => {
-      this.firebase.app.database().ref(`builds/${buildId}/progress/${type}`).set(tasks)
-        .then(() => { observer.next(void 0); observer.complete(); })
-        .catch(error => { observer.error(error); });
-    });
-
-    return updateProgress
+    return this.rxFire.set(`builds/${buildId}/progress/${type}`, tasks)
       .switchMap(() => this.updateBuildStatus(buildId, true))
       .mapTo(void 0);
   }
@@ -87,11 +56,11 @@ export class AgentService {
   }
 
   setBuildStatus(buildId: number, buildStatus: BuildStatus) {
-    return new Observable<void>(observer => {
-      this.firebase.app.database().ref(`builds/${buildId}/status`).set(buildStatus)
-        .then(() => { observer.next(void 0); observer.complete(); })
-        .catch(error => { observer.error(error); });
-    });
+    return this.rxFire.set(`builds/${buildId}/status`, buildStatus);
+  }
+
+  private getBuild(buildId: number) {
+    return this.rxFire.get<Build>(`builds/${buildId}`).first();
   }
 
   private calculateBuildStatus(inProgress: boolean, buildProgress: BuildProgress) {

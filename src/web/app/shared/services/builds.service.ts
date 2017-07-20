@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
-import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
 
 import { Build, BuildOptions, BuildStatus } from '../../../../common/interfaces/build';
+import { DatabaseService } from './database.service';
 
 @Injectable()
 export class BuildsService {
-  constructor(private firebaseDatabase: AngularFireDatabase) {
-  }
+  constructor(private database: DatabaseService) { }
 
   getBuild(buildId: number) {
-    return this.firebaseDatabase.object(`builds/${buildId}`) as Observable<Build>;
+    return this.database.object<Build>(`builds/${buildId}`);
   }
 
   getBuildsByStatus(status: BuildStatus) {
-    return this.firebaseDatabase.list('builds', {
+    return this.database.list('builds', {
       query: {
         orderByChild: 'status',
         equalTo: status
@@ -23,25 +22,12 @@ export class BuildsService {
   }
 
   queueBuild(buildOptions: BuildOptions) {
-    return new Observable<number>(observer => {
-      this.firebaseDatabase.database.ref('counters/builds')
-        .transaction(buildCounter => (buildCounter || 0) + 1, (transactionError, committed, snapshot) => {
-          if (committed) {
-            const buildId = snapshot.val();
-
-            const build: Build = {
-              buildId,
-              status: BuildStatus.Queued,
-              ...buildOptions
-            };
-
-            this.firebaseDatabase.database.ref(`builds/${buildId}`).set(build)
-              .then(() => observer.next(buildId))
-              .catch(error => observer.error(error));
-          } else {
-            observer.error(transactionError);
-          }
-        });
-      });
+    return this.database.transaction<number>('counters/builds', value => (value || 0) + 1)
+      .map(buildId => ({
+        buildId,
+        status: BuildStatus.Queued,
+        ...buildOptions
+      }))
+      .switchMap(build => this.database.set(`builds/${build.buildId}`, build).mapTo(build.buildId));
   }
 }

@@ -18,6 +18,7 @@ import { QueueBuildDialogComponent } from './shared/components/queue-build-dialo
 import { EnumValuePipe } from './shared/pipes/enum-value.pipe';
 import { AuthService } from './shared/services/auth.service';
 import { BuildsService } from './shared/services/builds.service';
+import { DatabaseService } from './shared/services/database.service';
 import { NavigationService } from './shared/services/navigation.service';
 import { SettingsService } from './shared/services/settings.service';
 
@@ -44,6 +45,7 @@ import { SettingsService } from './shared/services/settings.service';
   providers: [
     AuthService,
     BuildsService,
+    DatabaseService,
     NavigationService,
     SettingsService
   ],
