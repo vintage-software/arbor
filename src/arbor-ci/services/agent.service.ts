@@ -1,52 +1,22 @@
 import { Injectable } from '@angular/core';
-import * as chalk from 'chalk';
-import * as firebase from 'firebase-admin';
 import { Observable } from 'rxjs/Observable';
 
-import { readFileIfExists } from '../../common/helpers/fs.helpers';
 import { TaskStatus } from '../../common/interfaces/running-task';
 import { Build, BuildProgress, BuildStatus, TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration } from './../../common/interfaces/build-configuration';
-
-const firebaseConfigPath = 'arbor-firebase-config.json';
-
-interface FirebaseConfig {
-  crendential: firebase.ServiceAccount;
-  databaseURL: string;
-}
+import { FirebaseInitService } from './firebase-init.service';
 
 @Injectable()
-export class FirebaseService {
-  private __firebaseDatabase: firebase.database.Database;
+export class AgentService {
+  constructor(private firebase: FirebaseInitService) { }
 
-  get firebaseDatabase() {
-    if (this.__firebaseDatabase === undefined) {
-      const firebaseConfigJson = readFileIfExists(firebaseConfigPath);
-
-      if (firebaseConfigJson === undefined) {
-        console.log(chalk.red(`ERROR: ${firebaseConfigPath} not found. This file must contain your service credentials.`));
-        process.exit(1);
-      } else {
-        const firebaseConfig: FirebaseConfig = JSON.parse(firebaseConfigJson);
-
-        const firebaseApp = firebase.initializeApp({
-          credential: firebase.credential.cert(firebaseConfig.crendential),
-          databaseURL: firebaseConfig.databaseURL
-        });
-
-        this.__firebaseDatabase = firebaseApp.database();
-        this.firebaseDatabase.goOnline();
-      }
-    }
-
-    return this.__firebaseDatabase;
+  initialize() {
+    this.firebase.initialize();
   }
-
-  constructor() { }
 
   getBuildConfigration(name: string) {
     return new Observable<BuildConfiguration>(observer => {
-      this.firebaseDatabase.ref(`build-configurations/${name}`)
+      this.firebase.app.database().ref(`build-configurations/${name}`)
         .once('value')
         .then((snapshot: firebase.database.DataSnapshot) => { observer.next(snapshot.val()); observer.complete(); })
         .catch(error => { observer.error(error); });
@@ -55,7 +25,7 @@ export class FirebaseService {
 
   getNextQueuedBuild() {
     return new Observable<Build>(observer => {
-      const query = this.firebaseDatabase.ref('builds')
+      const query = this.firebase.app.database().ref('builds')
         .orderByChild('status')
         .equalTo(BuildStatus.Queued)
         .limitToFirst(1);
@@ -81,7 +51,7 @@ export class FirebaseService {
 
   getBuild(buildId: number) {
     return new Observable<Build>(observer => {
-      this.firebaseDatabase.ref(`builds/${buildId}`)
+      this.firebase.app.database().ref(`builds/${buildId}`)
         .once('value')
         .then((snapshot: firebase.database.DataSnapshot) => { observer.next(snapshot.val()); observer.complete(); })
         .catch(error => { observer.error(error); });
@@ -90,7 +60,7 @@ export class FirebaseService {
 
   updateBuildProgress(buildId: number, tasks: TaskProgress[], type: 'checkout' | 'tasks') {
     const updateProgress = new Observable<void>(observer => {
-      this.firebaseDatabase.ref(`builds/${buildId}/progress/${type}`).set(tasks)
+      this.firebase.app.database().ref(`builds/${buildId}/progress/${type}`).set(tasks)
         .then(() => { observer.next(void 0); observer.complete(); })
         .catch(error => { observer.error(error); });
     });
@@ -108,7 +78,7 @@ export class FirebaseService {
 
   setBuildStatus(buildId: number, buildStatus: BuildStatus) {
     return new Observable<void>(observer => {
-      this.firebaseDatabase.ref(`builds/${buildId}/status`).set(buildStatus)
+      this.firebase.app.database().ref(`builds/${buildId}/status`).set(buildStatus)
         .then(() => { observer.next(void 0); observer.complete(); })
         .catch(error => { observer.error(error); });
     });

@@ -11,14 +11,14 @@ import { BuildConfiguration } from './../../common/interfaces/build-configuratio
 import { Project } from './../../common/interfaces/project';
 import { RunningTask } from './../../common/interfaces/running-task';
 import { ShellService } from './../../common/services/shell.service';
-import { FirebaseService } from './firebase.service';
+import { AgentService } from './agent.service';
 
 const checkoutPath = './checkout/';
 const maxParallelOperations = 3;
 
 @Injectable()
 export class GitService {
-  constructor(private firebase: FirebaseService, private shell: ShellService) { }
+  constructor(private agentService: AgentService, private shell: ShellService) { }
 
   cloneRepos(buildId: number, configuration: BuildConfiguration) {
     let checkoutProgress: TaskProgress[] = [];
@@ -28,11 +28,11 @@ export class GitService {
         .switchMap(() => {
           task.status = status;
           checkoutProgress = ProgressService.computeUpdatedProgress(checkoutProgress, runningTasks);
-          return this.firebase.updateBuildProgress(buildId, checkoutProgress, 'checkout');
+          return this.agentService.updateBuildProgress(buildId, checkoutProgress, 'checkout');
         });
     };
 
-    return this.firebase.updateBuildProgress(buildId, checkoutProgress, 'checkout')
+    return this.agentService.updateBuildProgress(buildId, checkoutProgress, 'checkout')
       .switchMap(() => {
         const cleanTask: RunningTask = {
           taskName: 'clean',

@@ -5,45 +5,41 @@ import * as fsExtra from 'fs-extra';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 
-import { readFileIfExists } from '../../common/helpers/fs.helpers';
 import { environment } from './../../common/environments/environment';
+import { firebaseAppConfigFilename, firebaseAppInitConfigFilename, FirebaseConfigService } from './../services/firebase-config.service';
 
 @Injectable()
 export class DeployServerCommand {
-  constructor() { }
+  constructor(private configService: FirebaseConfigService) { }
 
   run() {
     console.log(`Arbor-CI v${environment.version}: Preparing to deploy server to Firebase.`);
     console.log();
 
-    const firebaseJson = readFileIfExists('firebase.json');
-    const firebaseInitJson = readFileIfExists('firebase.init.json');
+    const firebaseAppConfig = this.configService.getFirebaseAppConfig();
+    const firebaseAppInitConfig = this.configService.getFirebaseAppInitConfig();
 
-    if (firebaseJson === undefined) {
-      console.log(chalk.red('ERROR: This command must be run in a firebase app directory. firebase.json not found.'));
+    if (firebaseAppConfig === undefined) {
+      console.log(chalk.red(`ERROR: ${firebaseAppConfigFilename} not found. This command must be run in a firebase app directory.`));
       process.exit(1);
-    } else if (firebaseInitJson === undefined) {
-      console.log(chalk.red('ERROR: Firebase initialization settings not found. Please put these settings in firebase.init.json.'));
+    } else if (firebaseAppInitConfig === undefined) {
+      console.log(chalk.red(`ERROR: ${firebaseAppInitConfigFilename} not found. This file must contain your firebase app initialization settings.`));
       process.exit(1);
     } else {
-      const firebaseConfig = JSON.parse(firebaseJson);
-
       const webPath = path.join(path.dirname(process.argv[1]), 'web');
-      const hostingPath = path.resolve(firebaseConfig.hosting.public);
+      const hostingPath = path.resolve(firebaseAppConfig.hosting.public);
 
       console.log(`Copying website files to ${hostingPath}...`);
 
       rimraf.sync(hostingPath);
       fsExtra.copySync(webPath, hostingPath);
 
-      const firebaseInit = JSON.stringify(JSON.parse(firebaseInitJson));
-
       const mainJsFileName = fs.readdirSync(hostingPath).find(filePath => /^main(?:\.[a-z0-9]+)?\.js/.test(filePath));
       const mainJsPath = path.join(hostingPath, mainJsFileName);
 
       const newMainJsContents = fs.readFileSync(mainJsPath).toString()
-        .replace(/FirebaseAppConfigToken,{.+?}/, `FirebaseAppConfigToken,${firebaseInit}`)
-        .replace(/exports.firebaseAppConfig\s+?=\s+?{(.|\r|\n)+?}/, `exports.firebaseAppConfig = ${firebaseInit}`);
+        .replace(/FirebaseAppConfigToken,{.+?}/, `FirebaseAppConfigToken,${firebaseAppInitConfig}`)
+        .replace(/exports.firebaseAppConfig\s+?=\s+?{(.|\r|\n)+?}/, `exports.firebaseAppConfig = ${firebaseAppInitConfig}`);
 
       fs.writeFileSync(mainJsPath, newMainJsContents);
 

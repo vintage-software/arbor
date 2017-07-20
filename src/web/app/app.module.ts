@@ -11,7 +11,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BuildComponent } from './build/build.component';
 import { BuildsComponent } from './builds/builds.component';
-import { firebaseAppConfig } from './firebase.init';
+import { firebaseAppInitConfig } from './firebase-app-config';
 import { LoginComponent } from './login/login.component';
 import { BuildsTableComponent } from './shared/components/builds-table/builds-table.component';
 import { QueueBuildDialogComponent } from './shared/components/queue-build-dialog/queue-build-dialog.component';
@@ -35,7 +35,7 @@ import { SettingsService } from './shared/services/settings.service';
     BrowserModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
-    AngularFireModule.initializeApp(firebaseAppConfig),
+    AngularFireModule.initializeApp(firebaseAppInitConfig),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     AppRoutingModule,
