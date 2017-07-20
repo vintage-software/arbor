@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import * as crypto from 'crypto';
+import * as os from 'os';
 import { Observable } from 'rxjs/Observable';
 
 import { TaskStatus } from '../../common/interfaces/running-task';
@@ -8,10 +10,18 @@ import { FirebaseInitService } from './firebase-init.service';
 
 @Injectable()
 export class AgentService {
-  constructor(private firebase: FirebaseInitService) { }
+  readonly agentName: string;
+
+  constructor(private firebase: FirebaseInitService) {
+    const cwd = process.cwd();
+    const hostname = os.hostname();
+    const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 5);
+
+    this.agentName = `${hostname}-${cwdHash}`;
+  }
 
   initialize() {
-    this.firebase.initialize();
+    return this.firebase.initialize(this.agentName);
   }
 
   getBuildConfigration(name: string) {

@@ -17,9 +17,8 @@ export class RunAgentCommand {
     console.log(`Arbor-CI v${environment.version}: Running build agent.`);
     console.log();
 
-    this.agentService.initialize();
-
-    this.waitForNextBuild();
+    this.agentService.initialize()
+      .subscribe(() => { this.waitForNextBuild(); });
   }
 
   private waitForNextBuild() {
