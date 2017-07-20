@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as path from 'path';
+import { Observable } from 'rxjs/Observable';
 
 import { Build, BuildStatus } from '../../common/interfaces/build';
 import { environment } from './../../common/environments/environment';
@@ -29,9 +30,13 @@ export class RunAgentCommand {
 
   private runBuild(build: Build) {
     const handleMessage = (message: any) => {
+      let handler = Observable.of(undefined);
+
       if (message.type === 'build-tasks') {
-        this.agentService.updateBuildProgress(build.buildId, message.buildTasks, 'tasks').subscribe(() => { });
+        handler = this.agentService.updateBuildProgress(build.buildId, message.buildTasks, 'tasks');
       }
+
+      return handler;
     };
 
     return this.agentService.setBuildStatus(build.buildId, BuildStatus.InProgress)

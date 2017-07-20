@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { fork, spawn, ForkOptions, SpawnOptions } from 'child_process';
+import { Observable } from 'rxjs/Observable';
 
 export interface ExecResult {
   cwd: string;
@@ -58,35 +59,44 @@ export class ShellService {
     });
   }
 
-  fork(modulePath: string, args: string[], options?: ForkOptions, messageCallback?: (message: any) => void): Promise<ForkResult> {
+  fork(modulePath: string, args: string[], options?: ForkOptions, messageCallback?: (message: any) => Observable<void>): Promise<ForkResult> {
     const cwd = options.cwd || process.cwd();
 
     return new Promise<ForkResult>((resolve, reject) => {
       const result: ForkResult = { cwd, modulePath, error: undefined };
       const forkedProcess = fork(modulePath, args, { ...options });
 
+      let messagesWaiting = 0;
+
       forkedProcess.on('message', message => {
         if (messageCallback) {
-          messageCallback(message);
+          messagesWaiting++;
+
+          messageCallback(message)
+            .subscribe(() => { }, () => { }, () => { messagesWaiting--; });
         }
       });
 
       let done = false;
       const handleResult = (error: Error, code?: number, signal?: string) => {
         if (done === false) {
-          result.error = error;
+          if (messagesWaiting <= 0) {
+            result.error = error;
 
-          if (code !== 0) {
-            result.error = Object.assign({} , result.error || {}, { code, signal });
-          }
+            if (code !== 0) {
+              result.error = Object.assign({} , result.error || {}, { code, signal });
+            }
 
-          if (result.error !== undefined) {
-            reject(result);
+            if (result.error !== undefined) {
+              reject(result);
+            } else {
+              resolve(result);
+            }
+
+            done = true;
           } else {
-            resolve(result);
+            setTimeout(() => { handleResult(error, code, signal); }, 100);
           }
-
-          done = true;
         }
       };
 
