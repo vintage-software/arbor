@@ -8,11 +8,11 @@ export interface Project {
   projectPath: string;
 }
 
-export interface Command {
+export interface TaskCommand {
   status?: string;
   cwd?: string;
   command: string;
   noProgress?: boolean;
 }
 
-export type Task = string | Command | (string | Command)[];
+export type Task = string | TaskCommand | (string | TaskCommand)[];

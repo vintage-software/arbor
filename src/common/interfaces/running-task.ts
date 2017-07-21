@@ -1,4 +1,4 @@
-import { Command, Project } from './project';
+import { Project, TaskCommand } from './project';
 
 export enum TaskStatus {
   Waiting,
@@ -12,7 +12,7 @@ export interface RunningTask {
   project: Project;
   taskName: string;
   status: TaskStatus;
-  currentCommand?: Command;
+  currentCommand?: TaskCommand;
   progressLogLine?: string;
   statusText?: string;
 }
