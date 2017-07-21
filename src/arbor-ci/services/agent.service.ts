@@ -39,7 +39,7 @@ export class AgentService {
       utcLastPingTimestamp: new Date().getTime()
     };
 
-    return this.rxFire.set(`/agents/${this.agentName}`, agent);
+    return this.rxFire.set(`agents/${this.agentName}`, agent);
   }
 
   getBuildConfigration(name: string) {
