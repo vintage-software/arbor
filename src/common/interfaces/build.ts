@@ -26,6 +26,7 @@ export interface BuildProgress {
 }
 
 export interface BuildOptions {
+  branch: string;
   configuration: string;
 }
 

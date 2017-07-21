@@ -10,4 +10,8 @@ export class SettingsService {
   getBuildConfigurations() {
     return this.database.list<BuildConfiguration>('build-configurations');
   }
+
+  getBuildConfiguration(name: string) {
+    return this.database.object<BuildConfiguration>(`build-configurations/${name}`);
+  }
 }

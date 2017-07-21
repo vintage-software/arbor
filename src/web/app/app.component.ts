@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import * as firebase from 'firebase/app';
 import { Observable } from 'rxjs/Observable';
 
-import { AuthService } from './shared/services/auth.service';
+import { AuthService, User } from './shared/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +9,7 @@ import { AuthService } from './shared/services/auth.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  readonly user: Observable<firebase.User>;
+  readonly user: Observable<User>;
 
   constructor(private authService: AuthService) {
     this.user = this.authService.user;

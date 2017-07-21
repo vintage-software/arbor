@@ -8,6 +8,12 @@
       </md-option>
     </md-select>
     <em>{{(selectedBuildConfiguration | async)?.description}}</em>
+
+    <md-select class="full-width" [formControlName]="controls.branch" placeholder="Branch">
+      <md-option *ngFor="let branch of branches | async" [value]="branch">
+        {{ branch }}
+      </md-option>
+    </md-select>
   </md-dialog-content>
   <md-dialog-actions [attr.align]="'end'">
     <button md-button type="button" mdDialogClose>Nevermind</button>

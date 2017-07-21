@@ -14,6 +14,11 @@
     <md-cell *cdkCellDef="let build">{{ build.configuration }}</md-cell>
   </ng-container>
 
+  <ng-container cdkColumnDef="branch">
+    <md-header-cell *cdkHeaderCellDef>Branch</md-header-cell>
+    <md-cell *cdkCellDef="let build">{{ build.branch }}</md-cell>
+  </ng-container>
+
   <ng-container cdkColumnDef="status">
     <md-header-cell *cdkHeaderCellDef>Status</md-header-cell>
     <md-cell *cdkCellDef="let build">
@@ -22,6 +27,6 @@
     </md-cell>
   </ng-container>
 
-  <md-header-row *cdkHeaderRowDef="['buildId', 'agent', 'configuration', 'status']"></md-header-row>
-  <md-row *cdkRowDef="let build; columns: ['buildId', 'agent', 'configuration', 'status'];" class="build-row" (click)="navigateToBuild(build)"></md-row>
+  <md-header-row *cdkHeaderRowDef="['buildId', 'agent', 'configuration', 'branch', 'status']"></md-header-row>
+  <md-row *cdkRowDef="let build; columns: ['buildId', 'agent', 'configuration', 'branch', 'status'];" class="build-row" (click)="navigateToBuild(build)"></md-row>
 </md-table>

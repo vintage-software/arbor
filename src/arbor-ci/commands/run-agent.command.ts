@@ -54,9 +54,9 @@ export class RunAgentCommand implements Command {
       .switchMap(() => this.agentService.setBuildStatus(build.buildId, BuildStatus.InProgress))
       .switchMap(() => this.agentService.getBuildConfigration(build.configuration))
       .do(() => {
-        console.log(`${this.agentService.agentName}: Build ${build.buildId} started on  with the "${build.configuration}" build configuration.`);
+        console.log(`${this.agentService.agentName}: Build ${build.buildId} for branch "${build.branch}" started with the "${build.configuration}" build configuration.`);
       })
-      .switchMap(configuration => this.git.cloneRepos(build.buildId, configuration).mapTo(configuration))
+      .switchMap(configuration => this.git.cloneRepos(build.buildId, build.branch, configuration).mapTo(configuration))
       .switchMap(configuration => this.shell.fork(arborPath, ['run', ...configuration.tasks], { cwd: './checkout' }, handleMessage))
       .switchMap(() => this.agentService.updateBuildStatus(build.buildId, false))
       .do(buildStatus => {

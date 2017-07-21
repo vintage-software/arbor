@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularFireModule } from 'angularfire2';
@@ -20,6 +21,8 @@ import { AgentsService } from './shared/services/agents.service';
 import { AuthService } from './shared/services/auth.service';
 import { BuildsService } from './shared/services/builds.service';
 import { DatabaseService } from './shared/services/database.service';
+import { GitHubApiService } from './shared/services/github-api.service';
+import { GitHubService } from './shared/services/github.service';
 import { NavigationService } from './shared/services/navigation.service';
 import { SettingsService } from './shared/services/settings.service';
 
@@ -36,6 +39,7 @@ import { SettingsService } from './shared/services/settings.service';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpModule,
     ReactiveFormsModule,
     AngularFireModule.initializeApp(firebaseAppInitConfig),
     AngularFireDatabaseModule,
@@ -48,6 +52,8 @@ import { SettingsService } from './shared/services/settings.service';
     AuthService,
     BuildsService,
     DatabaseService,
+    GitHubApiService,
+    GitHubService,
     NavigationService,
     SettingsService
   ],
