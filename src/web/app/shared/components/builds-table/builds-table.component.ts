@@ -30,7 +30,7 @@ export class BuildsTableComponent extends BaseComponent implements OnInit {
 
   getCurrentTaskIfInProgress(build: Build) {
     const hasTasks = build.progress && build.progress.tasks && build.progress.tasks.length;
-    const isInProgress = build.status === BuildStatus.InProgress || build.status === BuildStatus.Failing;
+    const isInProgress = build.status === BuildStatus.InProgress;
 
     return hasTasks && isInProgress ? `(Current Task: ${build.progress.tasks[build.progress.tasks.length - 1].taskName})` : undefined;
   }

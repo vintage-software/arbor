@@ -3,7 +3,6 @@ import { TaskStatus } from './running-task';
 export enum BuildStatus {
   Queued,
   InProgress,
-  Failing,
   Passed,
   Failed,
   Errored

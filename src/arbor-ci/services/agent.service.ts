@@ -89,9 +89,7 @@ export class AgentService {
 
     const someTasksFailed = taskStatuses.some(taskStatus => [TaskStatus.Failed, TaskStatus.DependendecyFailed].includes(taskStatus));
 
-    if (inProgress && someTasksFailed) {
-      return BuildStatus.Failing;
-    } else if (inProgress) {
+    if (inProgress) {
       return BuildStatus.InProgress;
     } else if (someTasksFailed) {
       return BuildStatus.Failed;
