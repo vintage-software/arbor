@@ -8,10 +8,10 @@ export class SettingsService {
   constructor(private database: DatabaseService) { }
 
   getBuildConfigurations() {
-    return this.database.list<BuildConfiguration>('build-configurations');
+    return this.database.list<BuildConfiguration>('settings/buildConfigurations');
   }
 
   getBuildConfiguration(name: string) {
-    return this.database.object<BuildConfiguration>(`build-configurations/${name}`);
+    return this.database.object<BuildConfiguration>(`settings/buildConfigurations/${name}`);
   }
 }

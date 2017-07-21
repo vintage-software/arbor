@@ -43,7 +43,7 @@ export class AgentService {
   }
 
   getBuildConfigration(name: string) {
-    return this.rxFire.get<BuildConfiguration>(`build-configurations/${name}`).first();
+    return this.rxFire.get<BuildConfiguration>(`settings/buildConfigurations/${name}`).first();
   }
 
   getNextQueuedBuild(): Observable<Build> {
