@@ -2,4 +2,12 @@
 <span *ngIf="queuedBuildCount | async; let queuedBuildCount">There are {{ queuedBuildCount }} builds in the queue.</span>
 <hr />
 
-<app-builds-table title="In Progress Builds" [builds]="inProgressBuilds | async"></app-builds-table>
+<section>
+  <p>
+    <strong>In Progress Builds</strong> (<span>{{ busyAgentCount | async }} of {{ totalAgentCount | async }} agents are building</span>)
+  </p>
+
+  <md-progress-bar mode="determinate" [value]="agentBarProgress | async"></md-progress-bar>
+
+  <app-builds-table [builds]="inProgressBuilds | async"></app-builds-table>
+</section>

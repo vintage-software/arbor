@@ -34,5 +34,6 @@ export interface Build extends BuildOptions {
   buildId: number;
   configuration: string;
   status: BuildStatus;
+  agent: string;
   progress?: BuildProgress;
 }

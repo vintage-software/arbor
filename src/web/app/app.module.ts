@@ -16,6 +16,7 @@ import { LoginComponent } from './login/login.component';
 import { BuildsTableComponent } from './shared/components/builds-table/builds-table.component';
 import { QueueBuildDialogComponent } from './shared/components/queue-build-dialog/queue-build-dialog.component';
 import { EnumValuePipe } from './shared/pipes/enum-value.pipe';
+import { AgentsService } from './shared/services/agents.service';
 import { AuthService } from './shared/services/auth.service';
 import { BuildsService } from './shared/services/builds.service';
 import { DatabaseService } from './shared/services/database.service';
@@ -43,6 +44,7 @@ import { SettingsService } from './shared/services/settings.service';
     AppMaterialModule
   ],
   providers: [
+    AgentsService,
     AuthService,
     BuildsService,
     DatabaseService,

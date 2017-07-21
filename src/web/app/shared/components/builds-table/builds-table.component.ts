@@ -11,7 +11,6 @@ import { BaseComponent } from './../../../base.component';
   styleUrls: ['./builds-table.component.scss']
 })
 export class BuildsTableComponent extends BaseComponent implements OnInit {
-  @Input() title: string;
   @Input() builds: Build[];
 
   buildsDataSource: DataSource<Build>;

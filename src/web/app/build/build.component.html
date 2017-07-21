@@ -1,5 +1,6 @@
 <div *ngIf="build | async; let build" class="build">
   <div class="build-info">
+    <p><strong>Build Agent</strong>: {{ build.agent }}</p>
     <p><strong>Build Configuration</strong>: {{ build.configuration }}</p>
     <p><strong>Build Status</strong>: {{ (BuildStatus[build.status] || 'Unknown') | appEnumValue }}</p>
   </div>

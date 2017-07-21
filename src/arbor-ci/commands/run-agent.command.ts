@@ -3,6 +3,7 @@ import * as path from 'path';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
+import { AgentStatus } from '../../common/interfaces/agent';
 import { Build, BuildStatus } from '../../common/interfaces/build';
 import { Command } from '../../common/interfaces/command';
 import { environment } from './../../common/environments/environment';
@@ -27,12 +28,15 @@ export class RunAgentCommand implements Command {
       .switchMap(() => buildLoop);
 
     this.buildLoopSubscription = this.agentService.initialize()
+      .switchMap(() => this.agentService.setAgentStatus(AgentStatus.Idle))
       .switchMap(() => buildLoop)
       .subscribe(() => { });
   }
 
   stop() {
-    this.buildLoopSubscription.unsubscribe();
+    return Observable.of(undefined)
+      .do(() => { this.buildLoopSubscription.unsubscribe(); })
+      .switchMap(() => this.agentService.setAgentStatus(AgentStatus.Offline));
   }
 
   private runBuild(build: Build) {
@@ -46,21 +50,23 @@ export class RunAgentCommand implements Command {
       return handler;
     };
 
-    return this.agentService.setBuildStatus(build.buildId, BuildStatus.InProgress)
+    return this.agentService.setAgentStatus(AgentStatus.Busy, build.buildId)
+      .switchMap(() => this.agentService.setBuildStatus(build.buildId, BuildStatus.InProgress))
       .switchMap(() => this.agentService.getBuildConfigration(build.configuration))
       .do(() => {
-        console.log(`Build ${build.buildId} started with the "${build.configuration}" build configuration.`);
+        console.log(`${this.agentService.agentName}: Build ${build.buildId} started on  with the "${build.configuration}" build configuration.`);
       })
       .switchMap(configuration => this.git.cloneRepos(build.buildId, configuration).mapTo(configuration))
       .switchMap(configuration => this.shell.fork(arborPath, ['run', ...configuration.tasks], { cwd: './checkout' }, handleMessage))
       .switchMap(() => this.agentService.updateBuildStatus(build.buildId, false))
       .do(buildStatus => {
-        console.log(`Build ${build.buildId} completed with ${buildStatus === BuildStatus.Passed ? 'success' : 'failure'}.`);
+        console.log(`${this.agentService.agentName}: Build ${build.buildId} completed with ${buildStatus === BuildStatus.Passed ? 'success' : 'failure'}.`);
       })
       .catch(error => {
-        console.log(`Build ${build.buildId}: completed with error.`, error);
+        console.log(`${this.agentService.agentName}: Build ${build.buildId}: completed with error.`, error);
         return this.agentService.setBuildStatus(build.buildId, BuildStatus.Errored);
       })
+      .switchMap(() => this.agentService.setAgentStatus(AgentStatus.Idle))
       .mapTo(undefined);
   }
 }

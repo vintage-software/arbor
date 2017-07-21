@@ -1,11 +1,12 @@
-<p>
-  <strong>{{ title }}</strong>
-</p>
-
 <md-table #table [dataSource]="buildsDataSource">
   <ng-container cdkColumnDef="buildId">
     <md-header-cell *cdkHeaderCellDef>ID</md-header-cell>
     <md-cell *cdkCellDef="let build">Build {{ build.buildId }}</md-cell>
+  </ng-container>
+
+  <ng-container cdkColumnDef="agent">
+    <md-header-cell *cdkHeaderCellDef>Build Agent</md-header-cell>
+    <md-cell *cdkCellDef="let build">{{ build.agent }}</md-cell>
   </ng-container>
 
   <ng-container cdkColumnDef="configuration">
@@ -21,6 +22,6 @@
     </md-cell>
   </ng-container>
 
-  <md-header-row *cdkHeaderRowDef="['buildId', 'configuration', 'status']"></md-header-row>
-  <md-row *cdkRowDef="let build; columns: ['buildId', 'configuration', 'status'];" class="build-row" (click)="navigateToBuild(build)"></md-row>
+  <md-header-row *cdkHeaderRowDef="['buildId', 'agent', 'configuration', 'status']"></md-header-row>
+  <md-row *cdkRowDef="let build; columns: ['buildId', 'agent', 'configuration', 'status'];" class="build-row" (click)="navigateToBuild(build)"></md-row>
 </md-table>
