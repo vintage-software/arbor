@@ -15,7 +15,6 @@ import { BuildsService } from './../shared/services/builds.service';
 export class BuildsComponent {
   readonly queuedBuildCount: Observable<number>;
   readonly inProgressBuilds: Observable<Build[]>;
-  readonly inProgressBuildsDataSource: any;
 
   constructor(
     private dialog: MdDialog,
@@ -28,10 +27,6 @@ export class BuildsComponent {
 
     this.inProgressBuilds = this.buildsService.getBuildsByStatus(BuildStatus.InProgress)
       .shareReplay(1);
-
-    this.inProgressBuildsDataSource = {
-      connect: () => this.inProgressBuilds
-    };
   }
 
   queueBuild() {
