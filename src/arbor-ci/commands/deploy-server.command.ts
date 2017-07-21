@@ -6,10 +6,11 @@ import * as path from 'path';
 import * as rimraf from 'rimraf';
 
 import { environment } from './../../common/environments/environment';
+import { Command } from './../../common/interfaces/command';
 import { firebaseAppConfigFilename, firebaseAppInitConfigFilename, FirebaseConfigService } from './../services/firebase-config.service';
 
 @Injectable()
-export class DeployServerCommand {
+export class DeployServerCommand implements Command {
   constructor(private configService: FirebaseConfigService) { }
 
   run() {
@@ -46,4 +47,6 @@ export class DeployServerCommand {
       console.log(`Files copied! Run ${chalk.yellow('firebase deploy')} to deploy.`);
     }
   }
+
+  stop() { }
 }

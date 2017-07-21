@@ -20,6 +20,7 @@
     "dependency-graph": "",
     "firebase-admin": "",
     "fs-extra": "",
+    "node-cleanup": "",
     "reflect-metadata": "",
     "rimraf": "",
     "rxjs": "",
