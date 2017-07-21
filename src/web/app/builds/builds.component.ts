@@ -38,7 +38,7 @@ export class BuildsComponent {
       .shareReplay(1);
 
     this.agentBarProgress = Observable.combineLatest(this.busyAgentCount, this.totalAgentCount)
-      .map(([busyAgentCount, totalAgentCount]) => busyAgentCount / totalAgentCount * 100)
+      .map(([busyAgentCount, totalAgentCount]) => totalAgentCount ? busyAgentCount / totalAgentCount * 100 : 0)
       .shareReplay(1);
 
     this.queuedBuildCount = this.buildsService.getBuildsByStatus(BuildStatus.Queued)
