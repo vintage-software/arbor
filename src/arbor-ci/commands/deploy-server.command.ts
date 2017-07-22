@@ -11,24 +11,21 @@ import { firebaseAppConfigFilename, firebaseAppInitConfigFilename, FirebaseConfi
 
 @Injectable()
 export class DeployServerCommand implements Command {
-  constructor(private configService: FirebaseConfigService) { }
+  constructor(private firebaseConfig: FirebaseConfigService) { }
 
   run() {
     console.log(`Arbor-CI v${environment.version}: Preparing to deploy server to Firebase.`);
     console.log();
 
-    const firebaseAppConfig = this.configService.getFirebaseAppConfig();
-    const firebaseAppInitConfig = this.configService.getFirebaseAppInitConfig();
-
-    if (firebaseAppConfig === undefined) {
+    if (this.firebaseConfig.firebaseAppConfig === undefined) {
       console.log(chalk.red(`ERROR: ${firebaseAppConfigFilename} not found. This command must be run in a firebase app directory.`));
       process.exit(1);
-    } else if (firebaseAppInitConfig === undefined) {
+    } else if (this.firebaseConfig.firebaseAppInitConfig === undefined) {
       console.log(chalk.red(`ERROR: ${firebaseAppInitConfigFilename} not found. This file must contain your firebase app initialization settings.`));
       process.exit(1);
     } else {
       const webPath = path.join(path.dirname(process.argv[1]), 'web');
-      const hostingPath = path.resolve(firebaseAppConfig.hosting.public);
+      const hostingPath = path.resolve(this.firebaseConfig.firebaseAppConfig.hosting.public);
 
       console.log(`Copying website files to ${hostingPath}...`);
 
@@ -39,8 +36,8 @@ export class DeployServerCommand implements Command {
       const mainJsPath = path.join(hostingPath, mainJsFileName);
 
       const newMainJsContents = fs.readFileSync(mainJsPath).toString()
-        .replace(/FirebaseAppConfigToken,{.+?}/, `FirebaseAppConfigToken,${firebaseAppInitConfig}`)
-        .replace(/exports.firebaseAppConfig\s+?=\s+?{(.|\r|\n)+?}/, `exports.firebaseAppConfig = ${firebaseAppInitConfig}`);
+        .replace(/FirebaseAppConfigToken,{.+?}/, `FirebaseAppConfigToken,${this.firebaseConfig.firebaseAppInitConfig}`)
+        .replace(/exports.firebaseAppConfig\s+?=\s+?{(.|\r|\n)+?}/, `exports.firebaseAppConfig = ${this.firebaseConfig.firebaseAppInitConfig}`);
 
       fs.writeFileSync(mainJsPath, newMainJsContents);
 
