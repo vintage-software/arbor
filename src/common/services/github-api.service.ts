@@ -36,6 +36,13 @@ export class GitHubApiService {
       });
   }
 
+  post<T>(url: string, body: any, accessToken: string, parameters?: GitHubApiRequestParameters): Observable<T> {
+    const headers = this.getHeaders(accessToken);
+
+    return this.http.post(this.expandUrl(url, parameters), body, { headers })
+      .map(response => response.json());
+  }
+
   getHeaders(accessToken: string) {
     const headers = new Headers();
 

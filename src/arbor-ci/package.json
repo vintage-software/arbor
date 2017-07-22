@@ -15,10 +15,12 @@
   "dependencies": {
     "@angular/common": "",
     "@angular/core": "",
+    "@angular/platform-server": "",
     "chalk": "",
     "dependency-graph": "",
     "firebase-admin": "",
     "fs-extra": "",
+    "jsonwebtoken": "",
     "node-cleanup": "",
     "reflect-metadata": "",
     "rimraf": "",

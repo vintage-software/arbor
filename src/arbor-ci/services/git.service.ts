@@ -12,6 +12,7 @@ import { Project } from './../../common/interfaces/project';
 import { RunningTask } from './../../common/interfaces/running-task';
 import { ShellService } from './../../common/services/shell.service';
 import { AgentService } from './agent.service';
+import { GitHubAppService } from './github-app.service';
 
 const checkoutPath = './checkout/';
 const maxParallelOperations = 3;
@@ -26,7 +27,7 @@ interface CloneTask extends RunningTask {
 
 @Injectable()
 export class GitService {
-  constructor(private agentService: AgentService, private shell: ShellService) { }
+  constructor(private agentService: AgentService, private githubApp: GitHubAppService, private shell: ShellService) { }
 
   cloneRepos(buildId: number, branch: string, configuration: BuildConfiguration) {
     let checkoutProgress: TaskProgress[] = [];
@@ -50,7 +51,8 @@ export class GitService {
 
         return this.clean(cleanTask, (status: TaskStatus) => updateTaskStatus(cleanTask, status, [cleanTask]));
       })
-      .switchMap(() => {
+      .switchMap(() => this.githubApp.getAccessToken())
+      .switchMap(accessToken => {
         const cloneProjects = configuration.repos
           .map<CloneProject>(repo => ({ repo, name: repo.name, projectPath: path.resolve(path.join(checkoutPath, repo.name)) }));
 
@@ -58,7 +60,7 @@ export class GitService {
           .map(project => ({ project, taskName: 'clone', status: TaskStatus.Waiting }));
 
         const cloneSources = cloneTasks
-          .map(task => this.clone(task, branch, (status: TaskStatus) => updateTaskStatus(task, status, cloneTasks)));
+          .map(task => this.clone(task, branch, accessToken, (status: TaskStatus) => updateTaskStatus(task, status, cloneTasks)));
 
         return this.forkJoinWithLimit(cloneSources, maxParallelOperations);
       });
@@ -71,10 +73,10 @@ export class GitService {
       .catch(error => updateThisTaskStatus(TaskStatus.Failed).switchMapTo(Observable.throw(error)));
   }
 
-  private clone(task: CloneTask, branch: string, updateThisTaskStatus: (status: TaskStatus) => Observable<void>) {
+  private clone(task: CloneTask, branch: string, accessToken: string, updateThisTaskStatus: (status: TaskStatus) => Observable<void>) {
     const repo = task.project.name;
     const clonePath = task.project.projectPath;
-    const url = `https://github.com/${repo}.git`;
+    const url = `https://x-access-token:${accessToken}@github.com/${repo}.git`;
 
     const cloneCommand = task.project.repo.defaultBranchOnly ?
       `git clone --single-branch --depth 1 ${url} ${clonePath}` :

@@ -215,7 +215,7 @@
   dependencies:
     "@types/jasmine" "*"
 
-"@types/jsonwebtoken@^7.1.33":
+"@types/jsonwebtoken@7.2.2", "@types/jsonwebtoken@^7.1.33":
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-7.2.2.tgz#9a433e7d7b5afed4deb63e9742b18a671f2e312f"
   dependencies:
@@ -3533,7 +3533,7 @@ jsonwebtoken@7.1.9:
     ms "^0.7.1"
     xtend "^4.0.1"
 
-jsonwebtoken@^7.3.0:
+jsonwebtoken@7.4.1, jsonwebtoken@^7.3.0:
   version "7.4.1"
   resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-7.4.1.tgz#7ca324f5215f8be039cd35a6c45bb8cb74a448fb"
   dependencies:
