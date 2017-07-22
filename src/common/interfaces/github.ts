@@ -1,11 +1,9 @@
-export namespace Github {
-  export interface Branch {
-    name: string;
-    commit: Commit;
-  }
+export interface GithubBranch {
+  name: string;
+  commit: GithubCommit;
+}
 
-  export interface Commit {
-    sha: string;
-    url: string;
-  }
+export interface GithubCommit {
+  sha: string;
+  url: string;
 }

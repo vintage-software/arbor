@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { BuildConfiguration } from './../../../../common/interfaces/build-configuration';
-import { Github } from './../../../../common/interfaces/github';
+import { GithubBranch } from './../../../../common/interfaces/github';
 import { AuthService } from './auth.service';
 import { GitHubApiService } from './github-api.service';
 
@@ -21,7 +21,7 @@ export class GitHubService {
 
     return this.accessToken
       .first()
-      .switchMap(accessToken => Observable.combineLatest(repos.map(repo => this.github.get<Github.Branch[]>(`repos/${repo}/branches`, accessToken))))
+      .switchMap(accessToken => Observable.combineLatest(repos.map(repo => this.github.get<GithubBranch[]>(`repos/${repo}/branches`, accessToken))))
       .map(repoBranches => {
         const distinct = repoBranches
           .reduce((flat, current) => flat.concat(current), [])
