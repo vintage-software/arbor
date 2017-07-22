@@ -9,7 +9,7 @@ import { Command } from '../../common/interfaces/command';
 import { environment } from './../../common/environments/environment';
 import { ShellService } from './../../common/services/shell.service';
 import { AgentService } from './../services/agent.service';
-import { GitService } from './../services/git-service';
+import { GitService } from './../services/git.service';
 
 const arborPath = path.join(path.dirname(process.argv[1]), 'arbor.js');
 

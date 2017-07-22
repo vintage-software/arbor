@@ -7,7 +7,7 @@ import { AgentService } from './services/agent.service';
 import { ArborCiProgramService } from './services/arbor-ci-program.service';
 import { FirebaseConfigService } from './services/firebase-config.service';
 import { FirebaseInitService } from './services/firebase-init.service';
-import { GitService } from './services/git-service';
+import { GitService } from './services/git.service';
 
 export const providers = [
   AgentService,
