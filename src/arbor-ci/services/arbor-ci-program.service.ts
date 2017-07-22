@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as program from 'commander';
+import * as yargs from 'yargs';
 
 import { environment } from './../../common/environments/environment';
 import { Command } from './../../common/interfaces/command';
@@ -18,11 +18,9 @@ export class ArborCiProgramService {
   ) { }
 
   run() {
-    this.mapVersionFlag();
-    this.registerCommands();
-
     this.versionService.checkForUpdate('arbor-ci')
-      .then(() => { program.parse(process.argv); });
+      .then(() => this.registerCommands())
+      .then(() => yargs.argv);
   }
 
   cleanup() {
@@ -30,24 +28,14 @@ export class ArborCiProgramService {
   }
 
   private registerCommands() {
-    program.version(environment.version);
+    yargs.version(environment.version);
 
-    program
-      .command('deploy-server')
-      .description('Deploy the Arbor CI website to Firebase.')
-      .action(() => { this.command = this.deployServerCommand; this.deployServerCommand.run(); });
+    yargs
+      .command('deploy-server', 'Deploy the Arbor CI website to Firebase', yargs2 => yargs2,
+      () => { this.command = this.deployServerCommand; this.deployServerCommand.run(); });
 
-    program
-      .command('run-agent')
-      .description('Runs the Arbor CI build agent.')
-      .action(() => { this.command = this.runAgentCommand; this.runAgentCommand.run(); });
-  }
-
-  private mapVersionFlag() {
-    const vPos = process.argv.indexOf('-v');
-
-    if (vPos > -1) {
-      process.argv[vPos] = '-V';
-    }
+    yargs
+      .command('run-agent', 'Runs the Arbor CI build agent.', yargs2 => yargs2,
+      () => { this.command = this.runAgentCommand; this.runAgentCommand.run(); });
   }
 }

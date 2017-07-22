@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import * as program from 'commander';
-import { RunCommand, RunOptions } from '../commands/run.command';
-import { ScriptCommand, ScriptOptions } from '../commands/script.command';
+import * as yargs from 'yargs';
+import { RunCommand } from '../commands/run.command';
+import { ScriptCommand } from '../commands/script.command';
 import { environment } from './../../common/environments/environment';
 import { VersionService } from './../../common/services/version.service';
 import { ConfigService } from './config.service';
@@ -16,39 +16,26 @@ export class ArborProgramService {
   ) { }
 
   run() {
-    this.mapVersionFlag();
-    this.registerCommands();
-
     this.versionService.checkForUpdate('arbor')
-      .then(() => { program.parse(process.argv); });
+      .then(() => this.registerCommands())
+      .then(() => yargs.argv);
   }
 
   private registerCommands() {
-    program.version(environment.version);
+    yargs.version(environment.version);
 
-    program
-      .command('init')
-      .description('Create a new Arbor config')
-      .action(() => { this.configService.createArborConfig(); });
+    yargs
+      .command('init', 'Create a new Arbor config', yargs2 => yargs2,
+      () => { this.configService.createArborConfig(); });
 
-    program
-      .command('run <tasks...>')
-      .description('Run a given list of Arbor tasks in the current working directory.')
-      .option('--cwd <cwd>', 'Override the current working directory.')
-      .action((taskNames: string[], options: RunOptions) => { this.runCommand.run(taskNames, options); });
+    yargs
+      .command('run <tasks...>', 'Run a given list of Arbor tasks in the current working directory.', yargs2 => yargs2
+      .option('cwd', { default: '.', description: 'Override the current working directory.' }),
+      args => { this.runCommand.run(args.tasks, { cwd: args.cwd }); });
 
-    program
-      .command('script <tasks...>')
-      .description('Generate a script to run the given list of Arbor tasks in the current working directory.')
-      .option('--output <output>', 'Filename to write script. Required.')
-      .action((taskNames: string[], options: ScriptOptions) => { this.scriptCommand.run(taskNames, options); });
-  }
-
-  private mapVersionFlag() {
-    const vPos = process.argv.indexOf('-v');
-
-    if (vPos > -1) {
-      process.argv[vPos] = '-V';
-    }
+    yargs
+      .command('script <tasks...>', 'Generate a script to run the given list of Arbor tasks in the current working directory.', yargs2 => yargs2
+      .option('output', { default: 'build.bat', description: 'Filename to write script.' }),
+      args => { this.scriptCommand.run(args.tasks, { output: args.output }); });
   }
 }

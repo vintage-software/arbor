@@ -16,10 +16,10 @@
     "@angular/common": "",
     "@angular/core": "",
     "chalk": "",
-    "commander": "",
     "dependency-graph": "",
     "reflect-metadata": "",
     "rxjs": "",
+    "yargs": "",
     "zone.js": ""
   }
 }
