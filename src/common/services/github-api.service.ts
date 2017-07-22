@@ -40,6 +40,7 @@ export class GitHubApiService {
     const headers = new Headers();
 
     headers.set('Authorization', `Bearer ${accessToken}`);
+    headers.set('Accept', 'application/vnd.github.machine-man-preview+json');
 
     return headers;
   }
