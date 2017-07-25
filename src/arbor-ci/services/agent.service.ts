@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { TaskStatus } from '../../common/interfaces/running-task';
 import { mapToArray, SimpleMap } from './../../common/helpers/object.helpers';
 import { RxFire } from './../../common/helpers/rx-fire';
-import { agentPingDelay, Agent, AgentStatus } from './../../common/interfaces/agent';
+import { Agent, AgentStatus } from './../../common/interfaces/agent';
 import { Build, BuildProgress, BuildStatus, TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration } from './../../common/interfaces/build-configuration';
 import { FirebaseInitService } from './firebase-init.service';
@@ -15,6 +15,7 @@ import { FirebaseInitService } from './firebase-init.service';
 export class AgentService {
   readonly agentName: string;
 
+  private readonly database: firebase.database.Database;
   private readonly rxFire: RxFire;
 
   constructor(private firebase: FirebaseInitService) {
@@ -23,20 +24,20 @@ export class AgentService {
     const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 5);
 
     this.agentName = `${hostname}-${cwdHash}`;
-    this.rxFire = new RxFire(firebase.app.database());
+    this.database = firebase.app.database();
+    this.rxFire = new RxFire(this.database);
   }
 
   initialize() {
     return this.firebase.initialize(this.agentName)
-      .do(() => { this.pingFirebaseContinuously(); });
+      .do(() => { this.setOnDisconect(); });
   }
 
   setAgentStatus(agentStatus: AgentStatus, buildId: number = null) {
     const agent: Agent = {
       name: this.agentName,
       status: agentStatus,
-      buildId: buildId,
-      utcLastPingTimestamp: new Date().getTime()
+      buildId: buildId
     };
 
     return this.rxFire.set(`agents/${this.agentName}`, agent);
@@ -98,9 +99,8 @@ export class AgentService {
     }
   }
 
-  private pingFirebaseContinuously() {
-    Observable.timer(0, agentPingDelay)
-      .switchMap(() => this.rxFire.set(`/agents/${this.agentName}/utcLastPingTimestamp`, new Date().getTime()))
-      .subscribe(() => { });
+  private setOnDisconect() {
+    const agentStatusRef = this.database.ref(`/agents/${this.agentName}/status`);
+    agentStatusRef.onDisconnect().set(AgentStatus.Offline);
   }
 }
