@@ -3,12 +3,12 @@ import * as path from 'path';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import { deleteFolder } from '../../common/helpers/fs.helpers';
-import { TaskProgress } from '../../common/interfaces/build';
-import { TaskStatus } from '../../common/interfaces/running-task';
 import { ProgressService } from './../../arbor/services/progress.service';
+import { deleteFolder } from './../../common/helpers/fs.helpers';
+import { TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration, Repo } from './../../common/interfaces/build-configuration';
 import { Project } from './../../common/interfaces/project';
+import { TaskStatus } from './../../common/interfaces/running-task';
 import { RunningTask } from './../../common/interfaces/running-task';
 import { ShellService } from './../../common/services/shell.service';
 import { AgentService } from './agent.service';

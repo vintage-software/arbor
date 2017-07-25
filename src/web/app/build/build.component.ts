@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { TaskStatus } from '../../../common/interfaces/running-task';
 import { Build, BuildStatus, TaskProgress } from './../../../common/interfaces/build';
+import { TaskStatus } from './../../../common/interfaces/running-task';
 import { BuildsService } from './../shared/services/builds.service';
 
 @Component({

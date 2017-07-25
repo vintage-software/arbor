@@ -3,10 +3,10 @@ import * as path from 'path';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import { AgentStatus } from '../../common/interfaces/agent';
-import { Build, BuildStatus } from '../../common/interfaces/build';
-import { Command } from '../../common/interfaces/command';
 import { environment } from './../../common/environments/environment';
+import { AgentStatus } from './../../common/interfaces/agent';
+import { Build, BuildStatus } from './../../common/interfaces/build';
+import { Command } from './../../common/interfaces/command';
 import { ShellService } from './../../common/services/shell.service';
 import { AgentService } from './../services/agent.service';
 import { GitService } from './../services/git.service';

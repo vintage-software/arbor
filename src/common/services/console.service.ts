@@ -1,6 +1,5 @@
-import * as readline from 'readline';
-
 import { Injectable } from '@angular/core';
+import * as readline from 'readline';
 
 @Injectable()
 export class ConsoleService {

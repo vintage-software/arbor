@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
+
 import { PackageManifestWebpackPlugin } from './package-manifest-webpack-plugin';
 
 const webpackNodeExternals = require('webpack-node-externals');

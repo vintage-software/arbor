@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as chalk from 'chalk';
 import * as jwt from 'jsonwebtoken';
 
-import { readFileIfExists, readJsonFileIfExists } from '../../common/helpers/fs.helpers';
+import { readFileIfExists, readJsonFileIfExists } from './../../common/helpers/fs.helpers';
 import { GitHubInstallation } from './../../common/interfaces/github';
 import { GitHubApiService } from './../../common/services/github-api.service';
 

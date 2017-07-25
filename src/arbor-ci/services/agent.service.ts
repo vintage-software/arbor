@@ -3,12 +3,12 @@ import * as crypto from 'crypto';
 import * as os from 'os';
 import { Observable } from 'rxjs/Observable';
 
-import { TaskStatus } from '../../common/interfaces/running-task';
 import { mapToArray, SimpleMap } from './../../common/helpers/object.helpers';
 import { RxFire } from './../../common/helpers/rx-fire';
 import { Agent, AgentStatus } from './../../common/interfaces/agent';
 import { Build, BuildProgress, BuildStatus, TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration } from './../../common/interfaces/build-configuration';
+import { TaskStatus } from './../../common/interfaces/running-task';
 import { FirebaseInitService } from './firebase-init.service';
 
 @Injectable()

@@ -3,7 +3,7 @@ import * as chalk from 'chalk';
 import * as firebase from 'firebase';
 import * as firebaseAdmin from 'firebase-admin';
 
-import { toColdObservable } from '../../web/app/shared/helpers/observable.helpers';
+import { toColdObservable } from './../../web/app/shared/helpers/observable.helpers';
 import { firebaseAppInitConfigFilename, firebaseServiceAccountFilename, FirebaseConfigService } from './firebase-config.service';
 
 @Injectable()

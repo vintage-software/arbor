@@ -3,7 +3,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
 import { Observable } from 'rxjs/Observable';
 
-import { toColdObservable } from '../helpers/observable.helpers';
+import { toColdObservable } from './../helpers/observable.helpers';
 import { DatabaseService } from './database.service';
 import { NavigationService } from './navigation.service';
 

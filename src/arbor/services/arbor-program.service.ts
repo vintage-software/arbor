@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as yargs from 'yargs';
-import { RunCommand } from '../commands/run.command';
-import { ScriptCommand } from '../commands/script.command';
+
 import { environment } from './../../common/environments/environment';
 import { VersionService } from './../../common/services/version.service';
+import { RunCommand } from './../commands/run.command';
+import { ScriptCommand } from './../commands/script.command';
 import { ConfigService } from './config.service';
 
 @Injectable()

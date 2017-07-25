@@ -3,7 +3,7 @@ import { MdDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { AgentStatus } from '../../../common/interfaces/agent';
+import { AgentStatus } from './../../../common/interfaces/agent';
 import { Build, BuildOptions, BuildStatus } from './../../../common/interfaces/build';
 import { QueueBuildDialogComponent } from './../shared/components/queue-build-dialog/queue-build-dialog.component';
 import { AgentsService } from './../shared/services/agents.service';

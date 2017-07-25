@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MdDialog, MdDialogRef } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
-import { BuildOptions } from '../../../../../common/interfaces/build';
+import { BuildOptions } from './../../../../../common/interfaces/build';
 import { BuildConfiguration } from './../../../../../common/interfaces/build-configuration';
 import { GitHubService } from './../../services/github.service';
 import { SettingsService } from './../../services/settings.service';
