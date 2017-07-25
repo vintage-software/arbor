@@ -6,6 +6,7 @@
     "start": "cd ./dist/arbor-ci/web && lite-server",
     "clean": "rimraf ./dist",
     "lint": "tslint --project tsconfig.json --type-check",
+    "lint--fix": "tslint --project tsconfig.json --type-check --fix",
     "prebuild": "run-s -n clean lint",
     "build": "webpack --config ./build/webpack.ts --progress",
     "build--prod": "cross-env NODE_ENV=production run-s -n build",
