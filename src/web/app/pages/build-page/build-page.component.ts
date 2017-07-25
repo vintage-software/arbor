@@ -2,16 +2,16 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { Build, BuildStatus, TaskProgress } from './../../../common/interfaces/build';
-import { TaskStatus } from './../../../common/interfaces/running-task';
-import { BuildsService } from './../shared/services/builds.service';
+import { Build, BuildStatus, TaskProgress } from './../../../../common/interfaces/build';
+import { TaskStatus } from './../../../../common/interfaces/running-task';
+import { BuildsService } from './../../common/core/services/builds.service';
 
 @Component({
-  selector: 'app-build',
-  templateUrl: './build.component.html',
-  styleUrls: ['./build.component.scss']
+  selector: 'app-build-page',
+  templateUrl: './build-page.component.html',
+  styleUrls: ['./build-page.component.scss']
 })
-export class BuildComponent {
+export class BuildPageComponent {
   readonly build: Observable<Build>;
   readonly combinedTasks: Observable<TaskProgress[]>;
 

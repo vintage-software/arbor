@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { Build, BuildOptions, BuildStatus } from './../../../../common/interfaces/build';
+import { Build, BuildOptions, BuildStatus } from './../../../../../common/interfaces/build';
 import { DatabaseService } from './database.service';
 
 @Injectable()

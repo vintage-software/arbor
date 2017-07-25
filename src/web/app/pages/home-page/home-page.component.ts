@@ -3,18 +3,18 @@ import { MdDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { AgentStatus } from './../../../common/interfaces/agent';
-import { Build, BuildOptions, BuildStatus } from './../../../common/interfaces/build';
-import { QueueBuildDialogComponent } from './../shared/components/queue-build-dialog/queue-build-dialog.component';
-import { AgentsService } from './../shared/services/agents.service';
-import { BuildsService } from './../shared/services/builds.service';
+import { AgentStatus } from './../../../../common/interfaces/agent';
+import { Build, BuildOptions, BuildStatus } from './../../../../common/interfaces/build';
+import { AgentsService } from './../../common/core/services/agents.service';
+import { BuildsService } from './../../common/core/services/builds.service';
+import { QueueBuildDialogComponent } from './../../dialogs/queue-build-dialog/queue-build-dialog.component';
 
 @Component({
-  selector: 'app-builds',
-  templateUrl: './builds.component.html',
-  styleUrls: ['./builds.component.scss']
+  selector: 'app-home-page',
+  templateUrl: './home-page.component.html',
+  styleUrls: ['./home-page.component.scss']
 })
-export class BuildsComponent {
+export class HomePageComponent {
   readonly busyAgentCount: Observable<number>;
   readonly totalAgentCount: Observable<number>;
   readonly agentBarProgress: Observable<number>;

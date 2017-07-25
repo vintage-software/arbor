@@ -2,8 +2,8 @@ import { DataSource } from '@angular/cdk';
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Build, BuildStatus } from './../../../../../common/interfaces/build';
-import { BaseComponent } from './../../../base.component';
+import { Build, BuildStatus } from './../../../../../../common/interfaces/build';
+import { BaseComponent } from './../../../../base.component';
 
 @Component({
   selector: 'app-builds-table',

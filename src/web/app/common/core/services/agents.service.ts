@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { Agent } from './../../../../common/interfaces/agent';
+import { Agent } from './../../../../../common/interfaces/agent';
 import { DatabaseService } from './database.service';
 
 @Injectable()

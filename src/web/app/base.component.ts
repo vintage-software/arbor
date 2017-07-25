@@ -2,8 +2,8 @@ import { OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subscription } from 'rxjs/Subscription';
 
-import { getChangesObservable, unsubscribeFromAll } from './shared/helpers/observable.helpers';
-import { getThisPropertyName } from './shared/helpers/reflection.helpers';
+import { getChangesObservable, unsubscribeFromAll } from './common/core/helpers/observable.helpers';
+import { getThisPropertyName } from './common/core/helpers/reflection.helpers';
 
 export class BaseComponent implements OnChanges, OnDestroy {
   private readonly changes = new BehaviorSubject<SimpleChanges>({});

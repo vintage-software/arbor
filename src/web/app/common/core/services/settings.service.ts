@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { BuildConfiguration } from './../../../../common/interfaces/build-configuration';
+import { BuildConfiguration } from './../../../../../common/interfaces/build-configuration';
 import { DatabaseService } from './database.service';
 
 @Injectable()

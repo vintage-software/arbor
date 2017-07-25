@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { AuthService, User} from './../shared/services/auth.service';
-import { NavigationService } from './../shared/services/navigation.service';
+import { AuthService, User} from './../../common/core/services/auth.service';
+import { NavigationService } from './../../common/core/services/navigation.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  selector: 'app-login-page',
+  templateUrl: './login-page.component.html',
+  styleUrls: ['./login-page.component.scss']
 })
-export class LoginComponent {
+export class LoginPageComponent {
   readonly user: Observable<User>;
 
   constructor(private authService: AuthService, private navigationService: NavigationService) {

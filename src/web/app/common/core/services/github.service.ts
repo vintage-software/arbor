@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { BuildConfiguration } from './../../../../common/interfaces/build-configuration';
-import { GithubBranch } from './../../../../common/interfaces/github';
-import { GitHubApiService } from './../../../../common/services/github-api.service';
+import { BuildConfiguration } from './../../../../../common/interfaces/build-configuration';
+import { GithubBranch } from './../../../../../common/interfaces/github';
+import { GitHubApiService } from './../../../../../common/services/github-api.service';
 import { AuthService } from './auth.service';
 
 @Injectable()

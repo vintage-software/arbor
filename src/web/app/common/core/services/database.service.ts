@@ -3,7 +3,7 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import { FirebaseListFactoryOpts, FirebaseObjectFactoryOpts, PathReference } from 'angularfire2/interfaces';
 import { Observable } from 'rxjs/Observable';
 
-import { RxFire } from './../../../../common/helpers/rx-fire';
+import { RxFire } from './../../../../../common/helpers/rx-fire';
 import { NavigationService } from './navigation.service';
 
 @Injectable()
