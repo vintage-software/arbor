@@ -19,18 +19,26 @@ export class GitHubService {
       .filter(repo => repo.defaultBranchOnly === false)
       .map(repo => repo.name);
 
-    return this.accessToken
-      .first()
-      .switchMap(accessToken => Observable.combineLatest(repos.map(repo => this.github.get<GithubBranch[]>(`repos/${repo}/branches`, accessToken))))
-      .map(repoBranches => {
-        const distinct = repoBranches
-          .reduce((flat, current) => flat.concat(current), [])
-          .map(branch => branch.name)
-          .filter((branch, index, self) => self.indexOf(branch) === index);
+    let getBranches: Observable<string[]>;
 
-        return repoBranches
-          .map(branches => branches.map(branch => branch.name))
-          .reduce((intersection, branches) => intersection.filter(branch => branches.indexOf(branch) > -1), distinct);
-      });
+    if (repos.length > 0) {
+      getBranches = this.accessToken
+        .first()
+        .switchMap(accessToken => Observable.combineLatest(repos.map(repo => this.github.get<GithubBranch[]>(`repos/${repo}/branches`, accessToken))))
+        .map(repoBranches => {
+          const distinct = repoBranches
+            .reduce((flat, current) => flat.concat(current), [])
+            .map(branch => branch.name)
+            .filter((branch, index, self) => self.indexOf(branch) === index);
+
+          return repoBranches
+            .map(branches => branches.map(branch => branch.name))
+            .reduce((intersection, branches) => intersection.filter(branch => branches.indexOf(branch) > -1), distinct);
+        });
+    } else {
+      getBranches = Observable.of(['master']);
+    }
+
+    return getBranches;
   }
 }
