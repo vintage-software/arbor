@@ -9,6 +9,7 @@ import { DeployServerCommand } from './commands/deploy-server.command';
 import { RunAgentCommand } from './commands/run-agent.command';
 import { AgentService } from './services/agent.service';
 import { ArborCiProgramService } from './services/arbor-ci-program.service';
+import { BuildService } from './services/build.service';
 import { FirebaseConfigService } from './services/firebase-config.service';
 import { FirebaseInitService } from './services/firebase-init.service';
 import { GitService } from './services/git.service';
@@ -21,6 +22,7 @@ import { GitHubAppService } from './services/github-app.service';
   providers: [
     AgentService,
     ArborCiProgramService,
+    BuildService,
     ConsoleService,
     DeployServerCommand,
     FirebaseConfigService,
