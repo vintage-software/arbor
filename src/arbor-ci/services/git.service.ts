@@ -3,13 +3,13 @@ import * as path from 'path';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import { ProgressService } from './../../arbor/services/progress.service';
+import { computeUpdatedBuildTaskProgress } from '../../common/helpers/progress.helpers';
 import { deleteFolder } from './../../common/helpers/fs.helpers';
 import { TaskProgress } from './../../common/interfaces/build';
 import { BuildConfiguration, Repo } from './../../common/interfaces/build-configuration';
 import { Project } from './../../common/interfaces/project';
-import { TaskStatus } from './../../common/interfaces/running-task';
 import { RunningTask } from './../../common/interfaces/running-task';
+import { TaskStatus } from './../../common/interfaces/running-task';
 import { ShellService } from './../../common/services/shell.service';
 import { AgentService } from './agent.service';
 import { GitHubAppService } from './github-app.service';
@@ -36,7 +36,7 @@ export class GitService {
       return Observable.of(undefined)
         .switchMap(() => {
           task.status = status;
-          checkoutProgress = ProgressService.computeUpdatedProgress(checkoutProgress, runningTasks);
+          checkoutProgress = computeUpdatedBuildTaskProgress(checkoutProgress, runningTasks);
           return this.agentService.updateBuildProgress(buildId, checkoutProgress, 'checkout');
         });
     };

@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import * as path from 'path';
 import { Observable } from 'rxjs/Observable';
 
+import { computeUpdatedBuildTaskProgress } from '../../common/helpers/progress.helpers';
 import { AgentStatus } from '../../common/interfaces/agent';
-import { Build, BuildStatus } from './../../common/interfaces/build';
+import { Build, BuildStatus, TaskProgress } from './../../common/interfaces/build';
+import { RunningTask } from './../../common/interfaces/running-task';
 import { ShellService } from './../../common/services/shell.service';
 import { AgentService } from './agent.service';
 import { GitService } from './git.service';
@@ -15,11 +17,16 @@ export class BuildService {
   constructor(private agentService: AgentService, private git: GitService, private shell: ShellService) { }
 
   runBuild(build: Build) {
+    let buildTasks: TaskProgress[] = [];
+
     const handleMessage = (message: any) => {
       let handler = Observable.of(undefined);
 
-      if (message.type === 'build-tasks') {
-        handler = this.agentService.updateBuildProgress(build.buildId, message.buildTasks, 'tasks');
+      if (message.type === 'running-tasks') {
+        const runningTasks: RunningTask[] = message.runningTasks;
+
+        buildTasks = computeUpdatedBuildTaskProgress(buildTasks, runningTasks);
+        handler = this.agentService.updateBuildProgress(build.buildId, buildTasks, 'tasks');
       }
 
       return handler;
