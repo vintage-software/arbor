@@ -59,14 +59,11 @@ exit /b`;
     for (const project of projects) {
       const task = project.tasks[taskName];
 
-      const commands = (Array.isArray(task) ? task : [task])
-        .map(command => typeof command === 'string' ? { command } : command);
-
       script += `
 echo;
 echo ${this.colorEcho(`*** Running task "${taskName}" in project "${project.name}." ***`, 32)}`;
 
-      for (const command of commands) {
+      for (const command of task) {
         let cwd: string;
 
         if (command.cwd) {

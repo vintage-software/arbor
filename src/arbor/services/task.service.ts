@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 
 import { bail } from './../../common/helpers/error.helpers';
-import { Project } from './../../common/interfaces/project';
+import { SimpleMap } from './../../common/helpers/object.helpers';
+import { Project, ProjectSchema, TaskCommand, TaskSchema } from './../../common/interfaces/project';
 
 @Injectable()
 export class TaskService {
   constructor() {
   }
 
-  matchTasks(projects: Project[], taskNames: string[]) {
+  matchTasks(projects: ProjectSchema[], taskNames: string[]) {
     const knownTaskNames = projects
       .map(project => Object.keys(project.tasks))
       .reduce((previous, current) => previous.concat(current), [])
@@ -21,6 +22,17 @@ export class TaskService {
     }
 
     return projects
-      .filter(project => taskNames.some(taskName => Object.keys(project.tasks).includes(taskName)));
+      .filter(project => taskNames.some(taskName => Object.keys(project.tasks).includes(taskName)))
+      .map(project => this.convertProjectSchemaToProject(project));
+  }
+
+  private convertProjectSchemaToProject(project: ProjectSchema) {
+    const convertTask = (task: TaskSchema) => (Array.isArray(task) ? task : [task])
+      .map(command => typeof command === 'string' ? { command } : command);
+
+    const tasks = Object.keys(project.tasks)
+      .reduce((acc, taskName) => ({ ...acc, [taskName]: convertTask(project.tasks[taskName]) }), {} as SimpleMap<TaskCommand[]>);
+
+    return { ...project, tasks } as Project;
   }
 }

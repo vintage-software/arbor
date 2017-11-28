@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { bail } from './../../common/helpers/error.helpers';
-import { Project } from './../../common/interfaces/project';
+import { ProjectSchema } from './../../common/interfaces/project';
 
 @Injectable()
 export class ProjectService {
@@ -31,8 +31,8 @@ export class ProjectService {
     return filelist;
   }
 
-  private readProjects(configFiles: string[]): Promise<Project[]> {
-    return new Promise<Project[]>((resolve, reject) => {
+  private readProjects(configFiles: string[]): Promise<ProjectSchema[]> {
+    return new Promise<ProjectSchema[]>((resolve, reject) => {
       const promises = configFiles
         .map(configFile => this.readConfig(configFile));
 
@@ -42,15 +42,15 @@ export class ProjectService {
     });
   }
 
-  private readConfig(configFile: string): Promise<Project[]> {
-    return new Promise<Project[]>((resolve, reject) => {
+  private readConfig(configFile: string): Promise<ProjectSchema[]> {
+    return new Promise<ProjectSchema[]>((resolve, reject) => {
       fs.readFile(configFile, (error, data) => {
         if (error) {
           reject(error);
         } else {
           const projectPath = path.resolve(path.dirname(configFile));
 
-          let projects: Project[] = JSON.parse(data.toString());
+          let projects: ProjectSchema[] = JSON.parse(data.toString());
           projects = Array.isArray(projects) ? projects : [projects];
 
           for (const project of projects) {
@@ -63,7 +63,7 @@ export class ProjectService {
     });
   }
 
-  private validateProjects(projects: Project[]) {
+  private validateProjects(projects: ProjectSchema[]) {
     const namePattern = /^[a-z0-9 -]+$/i;
     const nameRule = 'must contain only letters, numbers, spaces, and dashes';
 

@@ -162,12 +162,9 @@ export class TaskRunnerService {
 
     const task = runningTask.project.tasks[runningTask.taskName];
 
-    const commands = (Array.isArray(task) ? task : [task])
-      .map(command => typeof command === 'string' ? { command } : command);
-
     let runCommands = Promise.resolve(undefined);
 
-    for (const command of commands) {
+    for (const command of task) {
       runCommands = runCommands
         .then(() => {
           runningTask.statusText = command.status;

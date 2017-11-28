@@ -1,9 +1,9 @@
 import { SimpleMap } from './../helpers/object.helpers';
 
-export interface Project {
+export interface ProjectSchema {
   name: string;
   cwd?: string;
-  tasks?: SimpleMap<Task>;
+  tasks?: SimpleMap<TaskSchema>;
   dependencies?: string[];
   projectPath: string;
 }
@@ -15,4 +15,12 @@ export interface TaskCommand {
   noProgress?: boolean;
 }
 
-export type Task = string | TaskCommand | (string | TaskCommand)[];
+export type TaskSchema = string | TaskCommand | (string | TaskCommand)[];
+
+export interface Project {
+  name: string;
+  cwd?: string;
+  tasks?: SimpleMap<TaskCommand[]>;
+  dependencies?: string[];
+  projectPath: string;
+}
