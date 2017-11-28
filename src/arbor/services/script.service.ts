@@ -23,7 +23,7 @@ export class ScriptService {
     if (taskNames.length) {
       console.log(`Arbor v${environment.version}: scripting tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
-      this.projectService.getProjects()
+      this.projectService.getProjects(taskNames)
         .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))
         .then(projects => {
           let script = 'echo off';

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { bail } from './../../common/helpers/error.helpers';
 import { Project } from './../../common/interfaces/project';
 
 @Injectable()
@@ -9,9 +10,11 @@ export class ProjectService {
   constructor() {
   }
 
-  getProjects() {
+  getProjects(taskNames: string[]) {
     const configFiles = this.getConfigs('./');
-    return this.readProjects(configFiles);
+
+    return this.readProjects(configFiles)
+      .then(projects => this.validateProjects(projects, taskNames));
   }
 
   private getConfigs(dir: string, filelist: string[] = []): string[] {
@@ -58,5 +61,45 @@ export class ProjectService {
         }
       });
     });
+  }
+
+  private validateProjects(projects: Project[], taskNames: string[]) {
+    const namePattern = /^[a-z0-9 -]+$/i;
+    const nameRule = 'must contain only letters, numbers, spaces, and dashes';
+
+    for (const project of projects) {
+      if (namePattern.test(project.name) === false) {
+        bail(`Project names ${nameRule}. ('${project.name}')`);
+      }
+
+      for (const taskName of Object.keys(project.tasks)) {
+        if (namePattern.test(taskName) === false) {
+          bail(`Task names ${nameRule}. ('${project.name}: ${taskName}')`);
+        }
+      }
+    }
+
+    const projectTaskNames = projects
+      .map(project => Object.keys(project.tasks).map(taskName => `${project.name}: ${taskName}`))
+      .reduce((acc, tasks) => acc.concat(tasks), []);
+
+    for (const projectTaskName of projectTaskNames) {
+      if (projectTaskNames.indexOf(projectTaskName) !== projectTaskNames.lastIndexOf(projectTaskName)) {
+        bail(`Task '${projectTaskName}' has duplicate definitions.`);
+      }
+    }
+
+    const knownTaskNames = projects
+      .map(project => Object.keys(project.tasks))
+      .reduce((previous, current) => previous.concat(current), [])
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    for (const taskName of taskNames) {
+      if (knownTaskNames.includes(taskName) === false) {
+        bail(`Task '${taskName}' is not defined in any project.`);
+      }
+    }
+
+    return projects;
   }
 }

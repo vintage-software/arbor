@@ -30,7 +30,7 @@ export class TaskRunnerService {
     this.logService.deleteLogs();
 
     if (taskNames.length) {
-      this.projectService.getProjects()
+      this.projectService.getProjects(taskNames)
         .then(projects => {
           const next = () => {
             let taskPromise = Promise.resolve(void 0);
