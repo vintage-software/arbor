@@ -10,11 +10,11 @@ export class ProjectService {
   constructor() {
   }
 
-  getProjects(taskNames: string[]) {
+  getProjects() {
     const configFiles = this.getConfigs('./');
 
     return this.readProjects(configFiles)
-      .then(projects => this.validateProjects(projects, taskNames));
+      .then(projects => this.validateProjects(projects));
   }
 
   private getConfigs(dir: string, filelist: string[] = []): string[] {
@@ -63,7 +63,7 @@ export class ProjectService {
     });
   }
 
-  private validateProjects(projects: Project[], taskNames: string[]) {
+  private validateProjects(projects: Project[]) {
     const namePattern = /^[a-z0-9 -]+$/i;
     const nameRule = 'must contain only letters, numbers, spaces, and dashes';
 
@@ -86,17 +86,6 @@ export class ProjectService {
     for (const projectTaskName of projectTaskNames) {
       if (projectTaskNames.indexOf(projectTaskName) !== projectTaskNames.lastIndexOf(projectTaskName)) {
         bail(`Task '${projectTaskName}' has duplicate definitions.`);
-      }
-    }
-
-    const knownTaskNames = projects
-      .map(project => Object.keys(project.tasks))
-      .reduce((previous, current) => previous.concat(current), [])
-      .filter((value, index, self) => self.indexOf(value) === index);
-
-    for (const taskName of taskNames) {
-      if (knownTaskNames.includes(taskName) === false) {
-        bail(`Task '${taskName}' is not defined in any project.`);
       }
     }
 

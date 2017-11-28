@@ -11,6 +11,7 @@ import { ProgressService } from './services/progress.service';
 import { ProjectService } from './services/project.service';
 import { ScriptService } from './services/script.service';
 import { TaskRunnerService } from './services/task-runner.service';
+import { TaskService } from './services/task.service';
 
 export const providers = [
   ArborProgramService,
@@ -25,5 +26,6 @@ export const providers = [
   ScriptService,
   ShellService,
   TaskRunnerService,
+  TaskService,
   VersionService
 ];

@@ -8,12 +8,14 @@ import { Project } from './../../common/interfaces/project';
 import { ScriptOptions } from './../commands/script.command';
 import { DependencyGraphService } from './dependency-graph.service';
 import { ProjectService } from './project.service';
+import { TaskService } from './task.service';
 
 @Injectable()
 export class ScriptService {
   constructor(
     private dependencyGraphService: DependencyGraphService,
-    private projectService: ProjectService) { }
+    private projectService: ProjectService,
+    private taskService: TaskService) { }
 
   generateScript(taskNames: string[], options: ScriptOptions) {
     if (options.output === undefined) {
@@ -23,7 +25,8 @@ export class ScriptService {
     if (taskNames.length) {
       console.log(`Arbor v${environment.version}: scripting tasks ${taskNames.join(', ')} in ${process.cwd()}`);
 
-      this.projectService.getProjects(taskNames)
+      this.projectService.getProjects()
+        .then(projects => this.taskService.matchTasks(projects, taskNames))
         .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))
         .then(projects => {
           let script = 'echo off';

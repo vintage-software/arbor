@@ -11,6 +11,7 @@ import { DependencyGraphService } from './dependency-graph.service';
 import { LogService } from './log.service';
 import { ProgressService } from './progress.service';
 import { ProjectService } from './project.service';
+import { TaskService } from './task.service';
 
 @Injectable()
 export class TaskRunnerService {
@@ -20,7 +21,8 @@ export class TaskRunnerService {
     private logService: LogService,
     private progressService: ProgressService,
     private projectService: ProjectService,
-    private shell: ShellService) {
+    private shell: ShellService,
+    private taskService: TaskService) {
   }
 
   runTasks(taskNames: string[], options: RunOptions) {
@@ -30,7 +32,8 @@ export class TaskRunnerService {
     this.logService.deleteLogs();
 
     if (taskNames.length) {
-      this.projectService.getProjects(taskNames)
+      this.projectService.getProjects()
+      .then(projects => this.taskService.matchTasks(projects, taskNames))
         .then(projects => {
           const next = () => {
             let taskPromise = Promise.resolve(void 0);
