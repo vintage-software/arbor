@@ -80,6 +80,7 @@ export class TaskRunnerService {
 
           if (response === 'y') {
             console.log('');
+            this.logService.deleteLogs();
             taskPromise = this.runTask(projects, taskName, options, next);
           } else if (response === 'f') {
             const failedProjectNames = runningTasks
@@ -87,6 +88,7 @@ export class TaskRunnerService {
               .map(runningTask => runningTask.project.name);
 
             console.log('');
+            this.logService.deleteLogs();
             taskPromise = this.runTask(projects, taskName, options, next, failedProjectNames);
           } else if (process.send === undefined) {
             process.exit(1);
