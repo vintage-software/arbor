@@ -27,11 +27,11 @@ export function toColdObservable<T>(promise: Promise<T> | firebase.Promise<T>) {
     }
 
     if (promise instanceof firebase.Promise) {
-      promise
+      (promise as firebase.Promise<T>)
         .then(result => { observer.next(result); observer.complete(); })
         .catch(error => { observer.error(error); });
     } else {
-      promise
+      (promise as Promise<T>)
         .then(result => { observer.next(result); observer.complete(); })
         .catch(error => { observer.error(error); });
     }
