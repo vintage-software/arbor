@@ -4,6 +4,7 @@ import { ScriptService } from './../services/script.service';
 
 export interface ScriptOptions {
   output: string;
+  dryRun: boolean;
 }
 
 @Injectable()

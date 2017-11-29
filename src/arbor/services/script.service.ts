@@ -45,13 +45,24 @@ exit /b 1
 :success
 exit /b`;
 
-          writeFileSync(options.output, script);
+          if (options.dryRun) {
+            console.log();
+            console.log(chalk.green(`Dry run. '${options.output}' was not written.`));
+          } else {
+            writeFileSync(options.output, script);
+
+            console.log();
+            console.log(chalk.green(`'${options.output}' has been written.`));
+          }
         });
     }
   }
 
   private generateTaskScript(taskName: string, allProjects: Project[]) {
     let script = '';
+
+    console.log();
+    console.log(`scripting ${taskName}:`);
 
     const projects = this.dependencyGraphService.orderProjectsByDependencyGraph(allProjects.filter(project => project.tasks[taskName] !== undefined));
 
@@ -72,6 +83,8 @@ echo ${this.colorEcho(`*** Running task "${taskName}" in project "${project.name
         } else {
           cwd = project.projectPath;
         }
+
+        console.log(`${chalk.gray(cwd)}> ${command.command}`);
 
         script += `
 echo;

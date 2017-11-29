@@ -36,7 +36,8 @@ export class ArborProgramService {
 
     yargs
       .command('script <tasks...>', 'Generate a script to run the given list of Arbor tasks in the current working directory.', yargs2 => yargs2
-      .option('output', { default: 'build.bat', description: 'Filename to write script.' }),
-      args => { this.scriptCommand.run(args.tasks, { output: args.output }); });
+      .option('output', { default: 'build.bat', description: 'Filename to write script.' })
+      .option('dry-run', { default: false, description: 'Skip writing the output file.' }),
+      args => { this.scriptCommand.run(args.tasks, { output: args.output, dryRun: !!args.dryRun }); });
   }
 }
