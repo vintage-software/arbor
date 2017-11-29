@@ -10,7 +10,7 @@ export enum TaskStatus {
 
 export interface RunningTask {
   project: Project;
-  taskName: string;
+  taskFlag: string;
   status: TaskStatus;
   currentCommand?: TaskCommand;
   progressLogLine?: string;

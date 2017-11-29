@@ -44,7 +44,7 @@ export class GitService {
     return this.agentService.updateBuildProgress(buildId, checkoutProgress, 'checkout')
       .switchMap(() => {
         const cleanTask: RunningTask = {
-          taskName: 'clean',
+          taskFlag: 'clean',
           status: TaskStatus.Waiting,
           project: { name: 'all', projectPath: path.resolve(checkoutPath) }
         };
@@ -57,7 +57,7 @@ export class GitService {
           .map<CloneProject>(repo => ({ repo, name: repo.name, projectPath: path.resolve(path.join(checkoutPath, repo.name)) }));
 
         const cloneTasks: CloneTask[] = cloneProjects
-          .map(project => ({ project, taskName: 'clone', status: TaskStatus.Waiting }));
+          .map(project => ({ project, taskFlag: 'clone', status: TaskStatus.Waiting }));
 
         const cloneSources = cloneTasks
           .map(task => this.clone(task, branch, accessToken, (status: TaskStatus) => updateTaskStatus(task, status, cloneTasks)));

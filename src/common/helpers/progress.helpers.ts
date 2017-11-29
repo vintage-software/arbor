@@ -7,13 +7,13 @@ export function computeUpdatedBuildTaskProgress(buildTaskProgress: TaskProgress[
   buildTaskProgress = [ ...buildTaskProgress ];
 
   for (const runningTask of runningTasks) {
-    const taskName = runningTask.taskName;
+    const taskFlag = runningTask.taskFlag;
     const projectName = runningTask.project.name;
 
-    let taskProgress = buildTaskProgress.find(task => task.taskName === taskName);
+    let taskProgress = buildTaskProgress.find(task => task.taskFlag === taskFlag);
 
     if (taskProgress === undefined) {
-      taskProgress = { taskName, projects: [] };
+      taskProgress = { taskFlag, projects: [] };
       buildTaskProgress.push(taskProgress);
     }
 
@@ -35,7 +35,7 @@ export function computeUpdatedBuildTaskProgress(buildTaskProgress: TaskProgress[
 }
 
 export function getStatusText(runningTask: RunningTask, useProgressLine = true, useColor = true) {
-  const defaultStatus = getDefaultStatusText(runningTask.taskName);
+  const defaultStatus = getDefaultStatusText(runningTask.taskFlag);
 
   let statusText;
 
@@ -66,18 +66,18 @@ export function getStatusText(runningTask: RunningTask, useProgressLine = true, 
   return statusText;
 }
 
-export function getDefaultStatusText(taskName: string): string {
+export function getDefaultStatusText(taskFlag: string): string {
   let status = 'in progress';
 
-  if (taskName.indexOf('clean') > -1) {
+  if (taskFlag.indexOf('clean') > -1) {
     status = 'cleaning';
-  } else if (taskName.indexOf('clone') > -1) {
+  } else if (taskFlag.indexOf('clone') > -1) {
     status = 'cloning';
-  } else if (taskName.indexOf('install') > -1) {
+  } else if (taskFlag.indexOf('install') > -1) {
     status = 'installing';
-  } else if (taskName.indexOf('build') > -1) {
+  } else if (taskFlag.indexOf('build') > -1) {
     status = 'building';
-  } else if (taskName.indexOf('test') > -1) {
+  } else if (taskFlag.indexOf('test') > -1) {
     status = 'testing';
   }
 

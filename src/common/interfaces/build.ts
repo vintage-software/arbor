@@ -16,7 +16,7 @@ export interface ProjectTaskProgress {
 }
 
 export interface TaskProgress {
-  taskName: string;
+  taskFlag: string;
   projects: ProjectTaskProgress[];
 }
 

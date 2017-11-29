@@ -67,14 +67,36 @@ export class ProjectService {
     const namePattern = /^[a-z0-9 -]+$/i;
     const nameRule = 'must contain only letters, numbers, spaces, and dashes';
 
+    const taskOptionPattern = /^[a-z0-9,]+$/i;
+    const taskOptionRule = 'must contain only letters, numbers, and commas (for separation)';
+
     for (const project of projects) {
       if (namePattern.test(project.name) === false) {
-        bail(`Project names ${nameRule}. ('${project.name}')`);
+        bail(`Project names ${nameRule}. (project '${project.name}')`);
       }
 
       for (const taskName of Object.keys(project.tasks)) {
         if (namePattern.test(taskName) === false) {
-          bail(`Task names ${nameRule}. ('${project.name}: ${taskName}')`);
+          bail(`Task names ${nameRule}. ('${project.name}' project, '${taskName}' task)`);
+        }
+
+        const task = project.tasks[taskName];
+
+        const taskCommands = (Array.isArray(task) ? task : [task])
+          .map(command => typeof command === 'string' ? { command } : command);
+
+        for (const taskCommand of taskCommands) {
+          if (typeof taskCommand.command !== 'string') {
+            if (Object.keys(taskCommand.command).includes('') === false) {
+              bail(`Task must define a default command. ('${project.name}' project, '${taskName}' task)`);
+            }
+
+            for (const taskOption of Object.keys(taskCommand.command)) {
+              if (taskOption !== '' && taskOptionPattern.test(taskOption) === false) {
+                bail(`Task options ${taskOptionRule}. ('${project.name}' project, '${taskName}' task, '${taskOption}' option)`);
+              }
+            }
+          }
         }
       }
     }

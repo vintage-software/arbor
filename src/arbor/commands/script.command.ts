@@ -11,7 +11,7 @@ export interface ScriptOptions {
 export class ScriptCommand {
   constructor(private scriptService: ScriptService) { }
 
-  run(taskNames: string[], options: ScriptOptions) {
-    this.scriptService.generateScript(taskNames, options);
+  run(taskFlags: string[], options: ScriptOptions) {
+    this.scriptService.generateScript(taskFlags, options);
   }
 }

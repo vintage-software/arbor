@@ -8,14 +8,14 @@ export interface ProjectSchema {
   projectPath: string;
 }
 
-export interface TaskCommand {
+export interface TaskCommandSchema {
   status?: string;
   cwd?: string;
-  command: string;
+  command: string | SimpleMap<string>;
   noProgress?: boolean;
 }
 
-export type TaskSchema = string | TaskCommand | (string | TaskCommand)[];
+export type TaskSchema = string | TaskCommandSchema | (string | TaskCommandSchema)[];
 
 export interface Project {
   name: string;
@@ -23,4 +23,13 @@ export interface Project {
   tasks?: SimpleMap<TaskCommand[]>;
   dependencies?: string[];
   projectPath: string;
+}
+
+export interface TaskCommand {
+  taskName: string;
+  option: string;
+  status?: string;
+  cwd?: string;
+  command: string;
+  noProgress?: boolean;
 }

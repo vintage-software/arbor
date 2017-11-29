@@ -17,21 +17,21 @@ export class ScriptService {
     private projectService: ProjectService,
     private taskService: TaskService) { }
 
-  generateScript(taskNames: string[], options: ScriptOptions) {
+  generateScript(taskFlags: string[], options: ScriptOptions) {
     if (options.output === undefined) {
       console.log(chalk.red('output path is required.'));
     }
 
-    if (taskNames.length) {
-      console.log(`Arbor v${environment.version}: scripting tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+    if (taskFlags.length) {
+      console.log(`Arbor v${environment.version}: scripting tasks ${taskFlags.join(', ')} in ${process.cwd()}`);
 
       this.projectService.getProjects()
-        .then(projects => this.taskService.matchTasks(projects, taskNames))
+        .then(projects => this.taskService.matchTasks(projects, taskFlags))
         .then(projects => {
           let script = 'echo off';
 
-          for (const taskName of taskNames) {
-            script += this.generateTaskScript(taskName, projects);
+          for (const taskFlag of taskFlags) {
+            script += this.generateTaskScript(taskFlag, projects);
           }
 
           script += `
@@ -58,20 +58,20 @@ exit /b`;
     }
   }
 
-  private generateTaskScript(taskName: string, allProjects: Project[]) {
+  private generateTaskScript(taskFlag: string, allProjects: Project[]) {
     let script = '';
 
     console.log();
-    console.log(`scripting ${taskName}:`);
+    console.log(`scripting ${taskFlag}:`);
 
-    const projects = this.dependencyGraphService.orderProjectsByDependencyGraph(allProjects.filter(project => project.tasks[taskName] !== undefined));
+    const projects = this.dependencyGraphService.orderProjectsByDependencyGraph(allProjects.filter(project => project.tasks[taskFlag] !== undefined));
 
     for (const project of projects) {
-      const task = project.tasks[taskName];
+      const task = project.tasks[taskFlag];
 
       script += `
 echo;
-echo ${this.colorEcho(`*** Running task "${taskName}" in project "${project.name}." ***`, 32)}`;
+echo ${this.colorEcho(`*** Running task "${taskFlag}" in project "${project.name}." ***`, 32)}`;
 
       for (const command of task) {
         let cwd: string;

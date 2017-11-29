@@ -10,12 +10,12 @@ export interface RunOptions {
 export class RunCommand {
   constructor(private taskRunner: TaskRunnerService) { }
 
-  run(taskNames: string[], options: RunOptions) {
+  run(taskFlags: string[], options: RunOptions) {
     if (options.cwd && options.cwd.length) {
       this.chdir(options.cwd);
     }
 
-    this.taskRunner.runTasks(taskNames, options);
+    this.taskRunner.runTasks(taskFlags, options);
   }
 
   private chdir(cwd: string) {

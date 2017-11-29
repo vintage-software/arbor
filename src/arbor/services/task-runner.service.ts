@@ -25,37 +25,37 @@ export class TaskRunnerService {
     private taskService: TaskService) {
   }
 
-  runTasks(taskNames: string[], options: RunOptions) {
-    this.console.log(`Arbor v${environment.version}: running tasks ${taskNames.join(', ')} in ${process.cwd()}`);
+  runTasks(taskFlags: string[], options: RunOptions) {
+    this.console.log(`Arbor v${environment.version}: running tasks ${taskFlags.join(', ')} in ${process.cwd()}`);
     this.console.log();
 
     this.logService.deleteLogs();
 
-    if (taskNames.length) {
+    if (taskFlags.length) {
       this.projectService.getProjects()
-      .then(projects => this.taskService.matchTasks(projects, taskNames))
+      .then(projects => this.taskService.matchTasks(projects, taskFlags))
         .then(projects => {
           const next = () => {
             let taskPromise = Promise.resolve(void 0);
 
-            taskNames.shift();
+            taskFlags.shift();
 
-            if (taskNames.length) {
-              taskPromise = this.runTask(projects, taskNames[0], options, next);
+            if (taskFlags.length) {
+              taskPromise = this.runTask(projects, taskFlags[0], options, next);
             }
 
             return taskPromise;
           };
 
-          return this.runTask(projects, taskNames[0], options, next);
+          return this.runTask(projects, taskFlags[0], options, next);
         });
     }
   }
 
-  runTask(projects: Project[], taskName: string, options: RunOptions, next: () => Promise<void>, projectNames?: string[]) {
-    this.console.log(`Task: ${taskName}`);
+  runTask(projects: Project[], taskFlag: string, options: RunOptions, next: () => Promise<void>, projectNames?: string[]) {
+    this.console.log(`Task: ${taskFlag}`);
 
-    return this.startTasks(projects, taskName, projectNames)
+    return this.startTasks(projects, taskFlag, projectNames)
       .then(runningTasks => this.waitUntilTaskIsComplete(runningTasks))
       .then(() => next())
       .catch((runningTasks: RunningTask[]) => {
@@ -84,7 +84,7 @@ export class TaskRunnerService {
           if (response === 'y') {
             console.log('');
             this.logService.deleteLogs();
-            taskPromise = this.runTask(projects, taskName, options, next);
+            taskPromise = this.runTask(projects, taskFlag, options, next);
           } else if (response === 'f') {
             const failedProjectNames = runningTasks
               .filter(runningTask => runningTask.status === TaskStatus.Failed || runningTask.status === TaskStatus.DependendecyFailed)
@@ -92,7 +92,7 @@ export class TaskRunnerService {
 
             console.log('');
             this.logService.deleteLogs();
-            taskPromise = this.runTask(projects, taskName, options, next, failedProjectNames);
+            taskPromise = this.runTask(projects, taskFlag, options, next, failedProjectNames);
           } else if (process.send === undefined) {
             process.exit(1);
           }
@@ -102,17 +102,14 @@ export class TaskRunnerService {
       });
   }
 
-  private startTasks(
-    allProjects: Project[],
-    taskName: string,
-    projectNames?: string[]): Promise<RunningTask[]> {
+  private startTasks(allProjects: Project[], taskFlag: string, projectNames?: string[]): Promise<RunningTask[]> {
     return Promise.resolve(allProjects)
-      .then(projects => projects.filter(project => project.tasks[taskName] !== undefined))
+      .then(projects => projects.filter(project => project.tasks[taskFlag] !== undefined))
       .then(projects => projectNames === undefined ? projects : projects.filter(project => projectNames.some(n => project.name === n)))
       .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))
       .then(projects => {
         const runningTasks: RunningTask[] = projects
-          .map(project => ({ project, taskName, status: TaskStatus.Waiting }));
+          .map(project => ({ project, taskFlag, status: TaskStatus.Waiting }));
 
         const getRunningTask = (projectName: string) => runningTasks.find(runningTask => runningTask.project.name === projectName);
 
@@ -160,7 +157,7 @@ export class TaskRunnerService {
   private startTask(runningTask: RunningTask): Promise<ExecResult> {
     runningTask.status = TaskStatus.InProgress;
 
-    const task = runningTask.project.tasks[runningTask.taskName];
+    const task = runningTask.project.tasks[runningTask.taskFlag];
 
     let runCommands = Promise.resolve(undefined);
 
@@ -242,7 +239,7 @@ export class TaskRunnerService {
 ------------------------------------------------------------------------------------------
 Config: ${path.join(runningTask.project.projectPath, 'arbor.json')}
 Project: ${runningTask.project.name}
-Task: ${runningTask.taskName}
+Task: ${runningTask.taskFlag}
 Command: ${result.cwd}> ${result.command}
 
 ${result.error ? `* Error:\n${JSON.stringify(result.error)}\n` : ''}
