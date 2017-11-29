@@ -27,7 +27,6 @@ export class ScriptService {
 
       this.projectService.getProjects()
         .then(projects => this.taskService.matchTasks(projects, taskNames))
-        .then(projects => this.dependencyGraphService.orderProjectsByDependencyGraph(projects))
         .then(projects => {
           let script = 'echo off';
 
@@ -54,7 +53,7 @@ exit /b`;
   private generateTaskScript(taskName: string, allProjects: Project[]) {
     let script = '';
 
-    const projects = allProjects.filter(project => project.tasks[taskName] !== undefined);
+    const projects = this.dependencyGraphService.orderProjectsByDependencyGraph(allProjects.filter(project => project.tasks[taskName] !== undefined));
 
     for (const project of projects) {
       const task = project.tasks[taskName];
