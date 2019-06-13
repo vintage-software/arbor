@@ -30,8 +30,9 @@ export class ArborProgramService {
 
     yargs
       .command('run <tasks...>', 'Run a given list of Arbor tasks in the current working directory.', yargs2 => yargs2
-      .option('cwd', { default: '.', description: 'Override the current working directory.' }),
-      args => { this.runCommand.run(args.tasks as any, { cwd: args.cwd }); });
+      .option('cwd', { default: '.', description: 'Override the current working directory.' })
+      .option('retry-prompt', { default: true, description: 'Prompt to retry tasks after failure.' }),
+      args => { this.runCommand.run(args.tasks as any, { cwd: args.cwd, retryPrompt: !!args.retryPrompt }); });
 
     yargs
       .command('script <tasks...>', 'Generate a script to run the given list of Arbor tasks in the current working directory.', yargs2 => yargs2

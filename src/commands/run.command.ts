@@ -4,6 +4,7 @@ import { TaskRunnerService } from './../services/task-runner.service';
 
 export interface RunOptions {
   cwd: string;
+  retryPrompt: boolean;
 }
 
 @Injectable()
