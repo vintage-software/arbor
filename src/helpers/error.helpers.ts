@@ -1,5 +1,5 @@
 
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 
 export function bail(message: string) {
   console.error(chalk.red(`Error: ${message}`));

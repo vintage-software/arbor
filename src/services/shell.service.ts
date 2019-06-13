@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
 import { fork, spawn, ForkOptions, SpawnOptions } from 'child_process';
-import { Observable } from 'rxjs/Observable';
+import { Injectable } from 'injection-js';
+import { Observable } from 'rxjs';
 
 export interface ExecResult {
   cwd: string;
@@ -73,7 +73,7 @@ export class ShellService {
           messagesWaiting++;
 
           messageCallback(message)
-            .subscribe(() => { }, () => { }, () => { messagesWaiting--; });
+          .subscribe({ complete: () => { messagesWaiting--; } });
         }
       });
 

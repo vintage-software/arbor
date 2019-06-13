@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { ReflectiveInjector } from '@angular/core';
+import { ReflectiveInjector } from 'injection-js';
 
 import { providers } from './providers';
 import { ArborProgramService } from './services/arbor-program.service';

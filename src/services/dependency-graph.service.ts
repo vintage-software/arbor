@@ -1,7 +1,5 @@
-/// <reference path="../types/dependency-graph.d.ts" />
-
-import { Injectable } from '@angular/core';
 import { DepGraph } from 'dependency-graph';
+import { Injectable } from 'injection-js';
 
 import { Project } from './../interfaces/project';
 

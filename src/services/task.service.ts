@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from 'injection-js';
 
 import { bail } from './../helpers/error.helpers';
 import { SimpleMap } from './../helpers/object.helpers';

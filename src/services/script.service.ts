@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { writeFileSync } from 'fs';
+import { Injectable } from 'injection-js';
 import * as path from 'path';
 
 import { ScriptOptions } from './../commands/script.command';

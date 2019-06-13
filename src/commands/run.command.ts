@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from 'injection-js';
 
 import { TaskRunnerService } from './../services/task-runner.service';
 

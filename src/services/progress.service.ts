@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from 'injection-js';
 
 import { getStatusText } from '../helpers/progress.helpers';
 import { RunningTask, } from './../interfaces/running-task';

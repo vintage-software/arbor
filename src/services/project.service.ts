@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import * as fs from 'fs';
+import { Injectable } from 'injection-js';
 import * as path from 'path';
 
 import { bail } from './../helpers/error.helpers';

@@ -7,6 +7,7 @@ const production = process.env.NODE_ENV === 'production';
 
 export default {
   target: 'node',
+  mode: 'development',
   devtool: 'source-map',
   externals: [
     webpackNodeExternals()

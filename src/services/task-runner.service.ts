@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from 'injection-js';
 import * as path from 'path';
 
 import { RunOptions } from './../commands/run.command';

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import * as fs from 'fs';
+import { Injectable } from 'injection-js';
 
 const errorLogFile = 'arbor-error.log';
 const infoLogFile = 'arbor-info.log';
