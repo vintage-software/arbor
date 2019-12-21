@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk = require('chalk');
 import * as fs from 'fs';
 import { Injectable } from 'injection-js';
 

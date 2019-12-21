@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk = require('chalk');
 import { writeFileSync } from 'fs';
 import { Injectable } from 'injection-js';
 import * as path from 'path';

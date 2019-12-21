@@ -1,5 +1,5 @@
 
-import chalk from 'chalk';
+import chalk = require('chalk');
 
 export function bail(message: string) {
   console.error(chalk.red(`Error: ${message}`));

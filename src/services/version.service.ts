@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk = require('chalk');
 import { Injectable } from 'injection-js';
 
 import { ConsoleService } from './console.service';
