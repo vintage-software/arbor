@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk = require('chalk');
 
 import { RunningTask, TaskStatus } from './../interfaces/running-task';
 
